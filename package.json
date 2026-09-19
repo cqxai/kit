@@ -1,6 +1,6 @@
 {
   "name": "cqx-kit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",
@@ -35,13 +35,17 @@
       "types": "./dist/workers/read.d.ts",
       "default": "./dist/workers/read.js"
     },
+    "./gh": {
+      "types": "./dist/gh/index.d.ts",
+      "default": "./dist/gh/index.js"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node tests/rank.mjs && node tests/catalog.mjs"
+    "test": "npm run build && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.0"
