@@ -73,12 +73,40 @@ jobs:
       - name: The built package must actually import
         run: |
           node --input-type=module -e "
-            import { policy, CQX_VERSION } from './dist/engine/index.js';
+            import { policy, CQX_VERSION, parsePath, toPath, buildIndex, search } from './dist/engine/index.js';
             if (!policy?.readers) throw new Error('policy did not load');
             if (!/^v\d+\.\d+\.\d+$/.test(CQX_VERSION)) {
               throw new Error('CQX_VERSION is not a version: ' + CQX_VERSION);
             }
+            // One value that has to round-trip, so the check fails on a broken
+            // export rather than only on a broken import.
+            const view = parsePath('/o/r/abc1234f/packages/p/types', '#T', '');
+            const back = toPath(view);
+            if (back !== '/o/r/abc1234f/packages/p/types#T') {
+              throw new Error('view did not round-trip: ' + back);
+            }
             console.log('imports clean — cqx ' + CQX_VERSION + ', ' + policy.readers + ' readers');
+          "
+
+      # Every entry point, not just the barrel. A worker body that does not
+      # resolve is a page that loads and then does nothing, which is the
+      # hardest kind of break to attribute.
+      - name: Every export must resolve
+        run: |
+          node --input-type=module -e "
+            import { createRequire } from 'node:module';
+            const require = createRequire(process.cwd() + '/');
+            const { exports } = require('./package.json');
+            const { access } = await import('node:fs/promises');
+            for (const [name, map] of Object.entries(exports)) {
+              // An entry is either a path or a map of conditions to paths.
+              const files = typeof map === 'string' ? [map] : Object.values(map);
+              for (const file of files) {
+                if (typeof file !== 'string') continue;
+                await access(file);
+                console.log(name + '  →  ' + file);
+              }
+            }
           "
 
       # No token: the identity is the OIDC claim, and provenance is attached
