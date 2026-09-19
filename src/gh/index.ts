@@ -221,7 +221,12 @@ const interesting = (path: string) =>
  */
 export async function answer(request: Request, gate: Gate): Promise<Response | null> {
   const url = new URL(request.url);
-    if (!url.pathname.startsWith('/gh/')) return null;
+  // `/gh` as well as `/gh/`. The reader probes the trailing-slash form, and a
+  // framework that normalises paths strips it before this ever runs — so the
+  // probe answered 404 while every real call worked, which is the worst way
+  // for this to fail: nothing looks wrong until somebody is rate limited.
+  const here = url.pathname === '/gh' || url.pathname.startsWith('/gh/');
+  if (!here) return null;
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -233,7 +238,7 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
     }
     if (request.method !== 'GET') return refuse(405, 'only GET');
 
-    const parts = url.pathname.slice('/gh/'.length).split('/').filter(Boolean);
+    const parts = url.pathname.replace(/^\/gh\/?/, '').split('/').filter(Boolean);
     const [owner, name, what, arg] = parts;
     const repo = `${owner}/${name}`;
 
