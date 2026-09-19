@@ -141,6 +141,7 @@ export function Code({
 }) {
   const [hljs, setHljs] = useState<Highlighter | null>(null);
   const row = useRef<HTMLDivElement | null>(null);
+  const viewport = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -184,14 +185,30 @@ export function Code({
 
   const width = String(startLine + lines.length - 1).length;
 
-  // Put the marked line on screen whenever the slice changes. The whole
-  // slice is in the document, so this is a scroll and never a fetch.
+  // Put the marked line on screen whenever the slice changes, *inside this
+  // viewer and nowhere else*.
+  //
+  // `scrollIntoView` was the obvious way and the wrong one: it scrolls every
+  // scrollable ancestor, so each card dragged the whole page down to its own
+  // code as it mounted — and then again when its file arrived. A reader got
+  // the report yanked out from under them before they had read the score.
+  // Moving `scrollTop` by hand can only ever move this box.
   useEffect(() => {
-    row.current?.scrollIntoView({ block: 'center' });
-  }, [startLine, lines.length, mark?.line]);
+    const box = viewport.current;
+    const hit = row.current;
+    if (!box || !hit) return;
+    // Nothing to do when everything already fits; setting scrollTop on a box
+    // that does not scroll is a no-op, but computing it is not free.
+    if (box.scrollHeight <= box.clientHeight) return;
+    const outer = box.getBoundingClientRect();
+    const inner = hit.getBoundingClientRect();
+    const centred = inner.top - outer.top - (outer.height - inner.height) / 2;
+    box.scrollTop = Math.max(0, box.scrollTop + centred);
+  }, [startLine, lines.length, mark?.line, html]);
 
   return (
     <div
+      ref={viewport}
       className={`cqx-code overflow-auto bg-ground font-mono text-[12px] leading-[1.55] ${className}`}
       // The gutter's width is its digits plus its own padding, because the
       // box includes the padding: asking for `${width}ch` and then padding it
