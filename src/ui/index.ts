@@ -48,6 +48,7 @@ export { Finding } from './Finding.js';
 export { RuleCard } from './RuleCard.js';
 export { Code, type CodeMark } from './Code.js';
 export { EffectBadges } from './EffectBadges.js';
+export { Graph, type GraphNode, type GraphEdge } from './Graph.js';
 export { LevelView } from './LevelView.js';
 export { Analysing, Working, Phases } from './Loading.js';
 export { RepoInput, asRepo } from './RepoInput.js';

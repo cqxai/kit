@@ -65,6 +65,8 @@ export { useStore, loadIndex, loadDataset, type RepoIndex } from './store.js';
 
 export { sourceOf, sourceHeld } from './source.js';
 
+export { freshPackages, packageEdges, edgeId, type Fresh } from './diff.js';
+
 export { loadCatalog, type Catalog, type Brand } from './catalog.js';
 
 export { liveDataset, liveIndex, type Stage } from './live.js';

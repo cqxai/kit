@@ -68,6 +68,8 @@ export function LevelView({
       return (
         <PackagesLevel
           packages={data.packages}
+          repo={repo}
+          previous={timeline[viewing + 1]?.short ?? null}
           onSelect={(id) =>
             onGo({
               pkg: data.packages.find((p) => p.id === id)?.name ?? null,

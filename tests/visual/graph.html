@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Graph, with something new in it</title>
+<style>
+  :root {
+    --color-ground: #15161a; --color-panel: #1d1f24; --color-ink: #f2ebdc;
+    --color-ink-soft: #a9a08f; --color-ink-faint: #756c5f;
+    --color-rule: #2e3037; --color-rule-soft: #232529;
+    --color-green: #3fa574; --color-yellow: #edbe52; --color-red: #e0594a;
+  }
+  body { margin: 0; background: var(--color-ground); }
+  /* The component names Tailwind utilities for its chrome; only the handful
+     the harness needs to look right are defined here. The SVG it draws uses
+     the custom properties above and needs nothing else. */
+  .relative { position: relative } .overflow-hidden { overflow: hidden }
+  .rounded-lg { border-radius: 8px } .border { border: 1px solid var(--color-rule-soft) }
+  .bg-panel { background: var(--color-panel) }
+  .h-\[560px\] { height: 560px } .w-full { width: 100% }
+  svg { display: block; width: 100%; height: 100% }
+  #root { padding: 16px; max-width: 1100px; margin: 0 auto }
+</style>
+<div id="root"></div>
+<script type="importmap">
+{ "imports": {
+  "react": "https://esm.sh/react@19",
+  "react-dom/client": "https://esm.sh/react-dom@19/client",
+  "react/jsx-runtime": "https://esm.sh/react@19/jsx-runtime",
+  "d3-force": "https://esm.sh/d3-force@3"
+} }
+</script>
+<script type="module">
+  import { createElement as h } from 'react';
+  import { createRoot } from 'react-dom/client';
+  import { Graph } from '../../dist/ui/Graph.js';
+
+  // A workspace where one crate and two edges arrived at this commit.
+  const names = ['core', 'cli', 'syntax', 'emit', 'store', 'xtask'];
+  const nodes = names.map((n, i) => ({
+    id: `pkg:${n}`, label: n, kind: 'crate', weight: i / names.length,
+    meta: `${10 + i} files · ${1000 * (i + 1)} lines`,
+  }));
+  const pairs = [
+    ['cli', 'core'], ['cli', 'syntax'], ['syntax', 'core'],
+    ['emit', 'syntax'], ['cli', 'store'], ['store', 'core'],
+  ];
+  const edges = pairs.map(([a, b]) => ({
+    id: `pkg:${a}→pkg:${b}`, from: `pkg:${a}`, to: `pkg:${b}`, type: 'depends_on',
+  }));
+  const fresh = new Set(['pkg:store', 'pkg:cli→pkg:store', 'pkg:store→pkg:core']);
+
+  createRoot(document.getElementById('root')).render(
+    h(Graph, { nodes, edges, fresh, since: 'd77ec8b8' }),
+  );
+  window.__ready = true;
+</script>
