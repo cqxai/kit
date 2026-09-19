@@ -84,4 +84,4 @@ export const policy: Policy = {
  * Pinned here rather than in each consumer's package.json, so a module bump
  * is one change rather than three that can disagree.
  */
-export const CQX_VERSION = 'v0.1.16';
+export const CQX_VERSION = 'v0.1.22';
