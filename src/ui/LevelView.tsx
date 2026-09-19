@@ -25,6 +25,7 @@ export function LevelView({
   viewing,
   at,
   repo,
+  earlier,
   scopeName,
   focus,
   files,
@@ -40,6 +41,8 @@ export function LevelView({
   at: string | null;
   /** `owner/name`, so a finding can be shown in the file it came from. */
   repo: string | null;
+  /** Commits with published data, older than this one, newest first. */
+  earlier?: string[];
   /** The package in scope, if one is. */
   scopeName: string | null;
   /** A symbol search asked to be shown, if one did. */
@@ -69,7 +72,7 @@ export function LevelView({
         <PackagesLevel
           packages={data.packages}
           repo={repo}
-          previous={timeline[viewing + 1]?.short ?? null}
+          earlier={earlier}
           onSelect={(id) =>
             onGo({
               pkg: data.packages.find((p) => p.id === id)?.name ?? null,

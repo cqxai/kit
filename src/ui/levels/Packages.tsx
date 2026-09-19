@@ -18,6 +18,10 @@ const Graph = lazy(() => import('../Graph.js').then((m) => ({ default: m.Graph }
 
 type Tab = 'grid' | 'graph';
 
+/** How far back to look for a commit that was actually scored. Beyond a few,
+ *  "new since" stops meaning anything a reader can act on. */
+const ATTEMPTS = 4;
+
 const TAB =
   'rounded-[6px] border px-2.5 py-[3px] font-mono text-[11.5px] cursor-pointer bg-transparent';
 const TAB_ON = 'border-button bg-rule-soft text-ink';
@@ -26,14 +30,14 @@ const TAB_OFF = 'border-rule-soft text-ink-soft hover:border-button';
 export function PackagesLevel({
   packages,
   repo,
-  previous,
+  earlier,
   onSelect,
 }: {
   packages: Package[];
-  /** `owner/name`, so the graph can ask what the previous commit held. */
+  /** `owner/name`, so the graph can ask what an earlier commit held. */
   repo?: string | null;
-  /** The commit before the one on screen, if the rail knows of one. */
-  previous?: string | null;
+  /** Commits with published data, older than this one, newest first. */
+  earlier?: string[];
   onSelect: (id: string) => void;
 }) {
   const [tab, setTab] = useState<Tab>('grid');
@@ -72,7 +76,7 @@ export function PackagesLevel({
             </div>
           }
         >
-          <PackageGraph packages={packages} repo={repo} previous={previous} onSelect={onSelect} />
+          <PackageGraph packages={packages} repo={repo} earlier={earlier} onSelect={onSelect} />
         </Suspense>
       ) : (
         <div className={CARD_GRID}>
@@ -110,33 +114,40 @@ export function PackagesLevel({
 function PackageGraph({
   packages,
   repo,
-  previous,
+  earlier,
   onSelect,
 }: {
   packages: Package[];
   repo?: string | null;
-  previous?: string | null;
+  earlier?: string[];
   onSelect: (id: string) => void;
 }) {
-  const [before, setBefore] = useState<Package[] | null>(null);
-  const [asked, setAsked] = useState(false);
+  const [was, setWas] = useState<{ at: string; packages: Package[] } | null>(null);
 
-  // The previous commit, fetched only once somebody is looking at the graph.
-  // Without it the picture is still correct; it just cannot say what is new.
+  // The most recent earlier commit that has data, fetched only once somebody
+  // is looking at the graph. Without one the picture is still correct; it
+  // simply cannot say what is new, and says nothing rather than saying
+  // "nothing changed" — which would be a claim it has not earned.
   useEffect(() => {
-    if (!repo || !previous) return;
+    const candidates = (earlier ?? []).slice(0, ATTEMPTS);
+    if (!repo || candidates.length === 0) return;
     let live = true;
-    loadDataset(repo, previous)
-      .then((dataset) => {
-        if (live) setBefore(dataset?.packages ?? null);
-      })
-      .finally(() => {
-        if (live) setAsked(true);
-      });
+    (async () => {
+      for (const at of candidates) {
+        const dataset = await loadDataset(repo, at);
+        if (!live) return;
+        if (dataset?.packages) {
+          setWas({ at, packages: dataset.packages });
+          return;
+        }
+      }
+    })();
     return () => {
       live = false;
     };
-  }, [repo, previous]);
+  }, [repo, earlier?.join('|')]);
+
+  const before = was?.packages ?? null;
 
   const { nodes, edges, fresh } = useMemo(() => {
     const largest = Math.max(...packages.map((p) => p.lines), 1);
@@ -167,7 +178,7 @@ function PackageGraph({
       nodes={nodes}
       edges={edges}
       fresh={before ? fresh : undefined}
-      since={before && previous ? previous : null}
+      since={was?.at ?? null}
       empty="No crates to draw."
       onSelect={onSelect}
     />

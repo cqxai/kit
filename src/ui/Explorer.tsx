@@ -357,6 +357,21 @@ export function Explorer({ host }: { host: () => Host }) {
     return () => { live = false; };
   }, [source, published.length]);
 
+  // The commits that can be compared against: the ones CI actually exported,
+  // older than the one being read, newest first.
+  //
+  // Not simply the next entry in the rail. The rail merges the five commits a
+  // repository published with the twenty GitHub lists, so the entry below the
+  // one on screen is usually a commit nobody ever scored — asking the store
+  // for it gets a 404 and the reader is told nothing is new when the truth is
+  // that nothing was compared.
+  const earlier = useMemo(() => {
+    const shownDate = published.find((c) => c.short === shownAt)?.date;
+    return published
+      .filter((c) => c.short !== shownAt && (!shownDate || c.date < shownDate))
+      .map((c) => c.short);
+  }, [published, shownAt]);
+
   const timeline = useMemo(() => {
     if (extra?.of !== source) return published;
     // What is published wins where it exists: it carries the scores.
@@ -673,6 +688,7 @@ export function Explorer({ host }: { host: () => Host }) {
                 viewing={commit}
                 at={shownAt}
                 repo={source}
+                earlier={earlier}
                 scopeName={packageName}
                 focus={view.focus}
                 files={files}
