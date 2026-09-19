@@ -31,6 +31,11 @@ const AROUND = 3;
  *  most useful thing to show: that is where a file says what it is. */
 const HEAD = 14;
 
+/** How many places to name before the list stops being a list. A rule with a
+ *  hundred and thirty findings printed twenty-five paths across four rows,
+ *  which is a wall, not something anybody picks from. */
+const NAMED = 8;
+
 export function RuleCard({
   rule,
   config,
@@ -317,13 +322,18 @@ function Where({
   pick: number;
   onPick: (i: number) => void;
 }) {
-  const more = rule.total_findings - rule.findings.length;
+  const [all, setAll] = useState(false);
+  // Whichever is being shown stays in the list, even when it is past the cut.
+  const shown = all ? rule.findings.length : Math.max(NAMED, pick + 1);
+  const listed = rule.findings.slice(0, shown);
+  const rest = rule.total_findings - listed.length;
+  const hidden = rule.findings.length - listed.length;
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono text-[11.5px]">
       <span className="text-ink-faint">
         {rule.total_findings.toLocaleString()} finding{rule.total_findings === 1 ? '' : 's'}
       </span>
-      {rule.findings.map((f, i) => (
+      {listed.map((f, i) => (
         <button
           key={`${f.file}:${f.line}:${i}`}
           type="button"
@@ -339,7 +349,20 @@ function Where({
           {short(f)}
         </button>
       ))}
-      {more > 0 ? <span className="text-ink-faint">… {more.toLocaleString()} more</span> : null}
+      {hidden > 0 ? (
+        <button
+          type="button"
+          onClick={() => setAll(true)}
+          className="cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-accent hover:underline"
+        >
+          + {hidden.toLocaleString()} more
+        </button>
+      ) : null}
+      {/* What the report did not carry. The scorer sends the first few per
+          rule; the rest are real and are not here to be clicked. */}
+      {rest - hidden > 0 ? (
+        <span className="text-ink-faint">… {(rest - hidden).toLocaleString()} not listed</span>
+      ) : null}
     </div>
   );
 }
