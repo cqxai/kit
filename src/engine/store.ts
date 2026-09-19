@@ -18,9 +18,23 @@
  *
  * A dataset is named by its commit and describes nothing else, so it is
  * immutable: once fetched it can be cached forever and never revalidated.
+ *
+ * Immutable in its contents, that is — not in its shape. When cqx learns to
+ * write something new down, every published dataset is re-exported at the
+ * same commit, and a reader holding the old bytes has no way to know: the URL
+ * did not move, and nothing about the answer says which tool produced it
+ * until it has already been parsed.
+ *
+ * So the version the reader expects is part of the address. A kit built
+ * against v0.1.16 asks a different URL than one built against v0.1.14, which
+ * means a schema bump clears every cache between here and the bucket without
+ * anybody clearing anything. It cost an afternoon to learn: the datasets were
+ * rebuilt, the site was redeployed, and the browser kept answering from a
+ * copy it was entitled to keep.
  */
 
 import { host } from './host.js';
+import { CQX_VERSION } from './policy.js';
 import type { Commit, Dataset } from './types.js';
 
 /**
@@ -75,7 +89,7 @@ const bases = (): string[] => [declared, shared()].filter((b): b is string => !!
 
 async function first<T>(path: string): Promise<T | null> {
   for (const base of bases()) {
-    const value = await json<T>(`${base}/${path}`);
+    const value = await json<T>(`${base}/${path}?v=${CQX_VERSION}`);
     if (value) return value;
   }
   return null;
