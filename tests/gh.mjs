@@ -126,5 +126,16 @@ const commits = [
   check('no bucket is not an error, only a cost', r.status === 200);
 }
 
+// 7. The probe, which is the one call that decides whether any of the above
+//    ever runs. A framework that normalises `/gh/` to `/gh` must not turn it
+//    into "there is no proxy here".
+for (const path of ['/gh/', '/gh']) {
+  const r = await answer(new Request(`https://x${path}`, { method: 'OPTIONS' }), { store: null });
+  check(`the probe is answered at ${path}`, r !== null && r.status === 200,
+    r === null ? 'fell through as not ours' : `status ${r.status}`);
+}
+check('and a path that is not ours still falls through',
+  (await answer(new Request('https://x/ghost'), { store: null })) === null);
+
 console.log(failed ? `\n${failed} failed` : '\nAll checks passed.');
 process.exit(failed ? 1 : 0);
