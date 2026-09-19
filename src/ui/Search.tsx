@@ -43,6 +43,7 @@ const TONE: Record<string, string> = {
 function Chip({ kind }: { kind: Hit['kind'] }) {
   return (
     <span
+      data-cqx="hit-kind"
       className={
         'self-center rounded border py-px text-center font-mono text-[9.5px] uppercase tracking-[0.06em] ' +
         (TONE[kind] ?? 'border-rule-soft text-ink-faint')
@@ -201,7 +202,9 @@ export function Search({
                   onClick={() => choose(hit)}
                 >
                   <Chip kind={hit.kind} />
-                  <span className="truncate font-mono text-[13px] font-semibold">{hit.name}</span>
+                  <span data-cqx="hit-name" className="truncate font-mono text-[13px] font-semibold">
+                    {hit.name}
+                  </span>
                   {/* The end of a path is the interesting end, so it is the end
                       that survives: direction flips the overflow to the left,
                       and the isolation keeps the flip from reordering the
@@ -221,7 +224,7 @@ export function Search({
         <div className="flex flex-wrap justify-between gap-4 border-t border-rule bg-panel px-3.5 py-2 font-mono text-[10.5px] text-ink-faint [&_kbd]:mr-0.5 [&_kbd]:rounded-[3px] [&_kbd]:border [&_kbd]:border-rule [&_kbd]:px-[3px] [&_kbd]:font-[inherit] [&_kbd]:text-ink-soft">
           <span><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>↵</kbd> open · <kbd>esc</kbd> close</span>
           {index ? (
-            <span className="flex flex-wrap gap-3">
+            <span data-cqx="counts" className="flex flex-wrap gap-3">
               {KIND_ORDER.map((k) => (
                 <span key={k}>
                   {index.counts[k].toLocaleString()}

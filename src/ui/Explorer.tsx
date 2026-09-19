@@ -566,7 +566,7 @@ export function Explorer({ host }: { host: () => Host }) {
               disappear on every click. Zero is what is known so far. */}
           {/* Right-aligned and reserved: the numbers change width as they are
               learned, and without a floor the whole line slides. */}
-          <span className="ml-auto text-right font-mono text-[12px] tabular-nums text-ink-faint side:min-w-[34ch] [&_b]:font-semibold [&_b]:text-ink">
+          <span data-cqx="totals" className="ml-auto text-right font-mono text-[12px] tabular-nums text-ink-faint side:min-w-[34ch] [&_b]:font-semibold [&_b]:text-ink">
             <b>{(data?.totals.nodes ?? 0).toLocaleString()}</b> nodes ·{' '}
             <b>{(data?.totals.edges ?? 0).toLocaleString()}</b> edges ·{' '}
             <b>{(data?.totals.lines ?? 0).toLocaleString()}</b> lines
