@@ -16,7 +16,9 @@
     "code-quality",
     "static-analysis"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/workers/*.js"
+  ],
   "files": [
     "dist"
   ],
@@ -38,7 +40,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node tests/rank.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.0"
