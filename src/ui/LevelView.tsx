@@ -24,6 +24,7 @@ export function LevelView({
   timeline,
   viewing,
   at,
+  repo,
   scopeName,
   focus,
   files,
@@ -37,6 +38,8 @@ export function LevelView({
   /** Which slot on the rail, or -1 for a commit it does not list. */
   viewing: number;
   at: string | null;
+  /** `owner/name`, so a finding can be shown in the file it came from. */
+  repo: string | null;
   /** The package in scope, if one is. */
   scopeName: string | null;
   /** A symbol search asked to be shown, if one did. */
@@ -54,6 +57,7 @@ export function LevelView({
           commits={timeline}
           viewing={viewing}
           at={at}
+          repo={repo}
           onBackToHead={() => onGo({ ref: timeline[0]?.short ?? null })}
           onJump={(l) => onGo({ level: l as LevelId })}
         />

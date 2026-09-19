@@ -2,16 +2,11 @@ import type { Commit, Score as ScoreData } from '../../engine/index.js';
 
 import { Score, toneOf } from '../Score.js';
 
-import { FINDINGS, H2, LEDE } from '../classes.js';
+import { H2, LEDE } from '../classes.js';
 
-/** A rule, and the edge that says whether it cost anything. */
-const RULE = "rounded-lg border border-rule-soft border-l-[3px] bg-panel px-[15px] py-[13px]";
-/** Quieter when it deducted nothing: still readable, not competing. */
-const RULE_OK = "opacity-[0.72]";
-const RULE_HIT = "border-l-red";
 import { band } from '../../engine/index.js';
 import { useEased } from '../animate.js';
-import { Finding } from '../Finding.js';
+import { RuleCard } from '../RuleCard.js';
 
 const CATEGORY_MEANING: Record<string, string> = {
   quality:
@@ -31,6 +26,7 @@ export function ScoreLevel({
   commits,
   viewing,
   at,
+  repo,
   onBackToHead,
   onJump,
 }: {
@@ -40,6 +36,8 @@ export function ScoreLevel({
   viewing: number;
   /** The commit being looked at, which is the only name an off-rail one has. */
   at: string | null;
+  /** `owner/name`, so a card can read the file its finding came from. */
+  repo: string | null;
   onBackToHead: () => void;
   onJump: (level: string) => void;
 }) {
@@ -52,6 +50,10 @@ export function ScoreLevel({
   // the commit being shown. The timeline is only consulted for what came
   // before it.
   const scores = score.scores;
+  // A finding's file has to be read at the commit that was scored, or the
+  // line numbers point into a different version of it. The rail's entry when
+  // there is one; otherwise the only name an off-rail commit has.
+  const sha = commits[viewing]?.sha ?? at;
 
   return (
     <div>
@@ -119,73 +121,15 @@ export function ScoreLevel({
             <p className="mb-3.5 mt-1.5 max-w-[68ch] text-[14px] text-ink-soft wide:col-span-2">
               {CATEGORY_MEANING[category] ?? ""}
             </p>
-            {rules.map((rule) => {
-              const cfg = score.config.rules[rule.rule];
-              const hit = rule.deducted > 0;
-              return (
-                <div className={`${RULE} ${hit ? RULE_HIT : RULE_OK}`} key={rule.rule}>
-                  <div className="mb-[5px] flex flex-wrap items-baseline gap-2.5">
-                    <span className="font-mono text-[13px] font-semibold">{rule.rule}</span>
-                    <span className="font-mono text-[11.5px] tabular-nums text-ink-soft">
-                      measured {rule.value.toFixed(2)}
-                      {cfg
-                        ? ` · free below ${cfg.free} · full at ${cfg.full}`
-                        : ""}{" "}
-                      · max {rule.weight}
-                    </span>
-                    <span
-                      className={
-                        "ml-auto font-mono text-[12.5px] " +
-                        (hit ? "font-semibold text-red" : "text-ink-faint")
-                      }
-                    >
-                      {hit
-                        ? `−${rule.deducted.toFixed(1)}${rule.capped ? " capped" : ""}`
-                        : "no deduction"}
-                    </span>
-                  </div>
-                  <p className="mb-2 max-w-[74ch] text-[13.5px] text-ink-soft">{rule.describes}</p>
-                  {hit && rule.remedy ? (
-                    <p className="mb-2.5 max-w-[74ch] border-l-2 border-button pl-[13px] text-[13.5px] text-ink">
-                      {rule.remedy}
-                    </p>
-                  ) : null}
-                  {rule.findings.length > 0 ? (
-                    <details>
-                      <summary>
-                        {rule.total_findings.toLocaleString()} finding
-                        {rule.total_findings === 1 ? "" : "s"}
-                        {" · "}
-                        <span
-                          onClick={(e) => {
-                            e.preventDefault();
-                            onJump(rule.level);
-                          }}
-                        >
-                          {rule.level} →
-                        </span>
-                      </summary>
-                      <div className={FINDINGS}>
-                        {rule.findings.map((f, i) => (
-                          <Finding key={i} finding={f} remedy={rule.remedy} />
-                        ))}
-                        {rule.total_findings > rule.findings.length ? (
-                          <div>
-                            <span className="text-ink-faint">…</span>
-                            <span className="text-ink-faint">
-                              {(
-                                rule.total_findings - rule.findings.length
-                              ).toLocaleString()}{" "}
-                              more
-                            </span>
-                          </div>
-                        ) : null}
-                      </div>
-                    </details>
-                  ) : null}
-                </div>
-              );
-            })}
+            {rules.map((rule) => (
+              <RuleCard
+                key={rule.rule}
+                rule={rule}
+                config={score.config.rules[rule.rule]}
+                repo={repo}
+                commit={sha}
+              />
+            ))}
           </section>
         );
       })}

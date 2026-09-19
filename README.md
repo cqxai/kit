@@ -19,21 +19,54 @@ band(74);            // 'warn'
 
 ## What is in it
 
-**`cqx-kit/engine`**
+**`cqx-kit/engine`** — everything the explorer knows that has nothing to do
+with how it is drawn: the wasm glue, the worker pool, the GitHub fetching, the
+store, the addressing, the search, and the shapes cqx emits (`Dataset`,
+`Score`, `Rule`, `Finding`, `Package`, `FileNode`, `TypeDecl`, …). `policy`
+holds every default the explorer has an opinion about, each documented with
+the reason it is that number rather than another.
 
-- `policy` — every default the explorer has an opinion about, each one
-  documented with the reason it is that number rather than another.
-- The shapes cqx emits: `Dataset`, `Score`, `Rule`, `Finding`, `Package`,
-  `FileNode`, `TypeDecl`, `FunctionDecl`, `EffectRow`, and the rest.
-- `band`, `EFFECT_LABEL`, `EFFECT_ORDER` — the small shared judgements about
-  how a number and an effect are read.
+**`cqx-kit/ui`** — the explorer itself, as React components. Structure lives
+here because it is the product: two deployments that disagree about where the
+menu is, or how a rule card reads, are two tools.
 
-## What is coming
+**`cqx-kit/gh`** — a runtime-agnostic GitHub proxy: a function from a Request
+to a Response, so a Cloudflare Worker and a Next route handler are each four
+lines around it.
 
-The reading itself: the wasm glue, the worker pool that divides a large
-repository between threads, and the GitHub fetching. It runs today inside the
-explorer and moves here unchanged, so that a third consumer — the viewer the
-cqx CLI opens for a folder on disk — gets it for free.
+**`cqx-kit/workers/*`** — the analyse and read worker bodies.
+
+## What a host supplies
+
+Only the palette. These components name colours and faces rather than
+carrying them, so an application supplies the values in its own Tailwind
+theme — twelve colours, two faces, and three lengths. Tailwind must also be
+told to scan the package, or none of the utilities are generated:
+
+```css
+@source "../node_modules/cqx-kit/dist";
+```
+
+Six more custom properties are optional, and only the code viewer reads them:
+
+```css
+--color-code-comment  --color-code-keyword  --color-code-string
+--color-code-number   --color-code-type     --color-code-function
+```
+
+Leave them out and code is legible, lit from the twelve. Define them and it is
+properly lit — a UI palette does not have enough hues for syntax, and
+stretching it over six roles gives a muddy result.
+
+## Showing code
+
+`RuleCard` reads a finding's file back out of the repository, at the commit
+that was scored, and marks the span the rule pointed at. The highlighter is
+highlight.js with the Rust grammar alone, chosen by measurement against
+shiki, CodeMirror 6 and Monaco: it was correct on every construct tried and
+costs 9.3 KB, where Monaco costs 470 KB and splits `'\''` at the escape.
+Both editors draw only the rows on screen, which is also why the browser's own
+find cannot see a line they have not drawn — and a report is a document.
 
 ## Licence
 

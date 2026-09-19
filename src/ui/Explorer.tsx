@@ -672,6 +672,7 @@ export function Explorer({ host }: { host: () => Host }) {
                 timeline={timeline}
                 viewing={commit}
                 at={shownAt}
+                repo={source}
                 scopeName={packageName}
                 focus={view.focus}
                 files={files}

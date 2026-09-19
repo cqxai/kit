@@ -18,6 +18,11 @@ export interface Finding {
   col?: [number, number];
   /** The line itself, so the code can be shown rather than described. */
   text?: string;
+  /** The enclosing item — the function or impl the finding sits inside — so
+   *  a reader can zoom out to the thing that is wrong rather than the line.
+   *  Absent in reports written before cqx recorded it, and for findings that
+   *  are about a whole file. */
+  item?: { name: string; kind: string; from: number; to: number };
 }
 
 export interface Rule {
@@ -34,6 +39,10 @@ export interface Rule {
   findings: Finding[];
   /** The elevation this rule's findings live at, e.g. `L3`. */
   level: string;
+  /** Which language the rule is about, e.g. `rust`. It prefixes the rule's
+   *  name everywhere it is shown, and names its page in the docs. Absent in
+   *  reports written before cqx had a second frontend. */
+  language?: string;
 }
 
 export interface RuleConfig {

@@ -21,6 +21,15 @@
  * `:root`: `--head` (the header's height), `--rail` (the menu's column) and
  * `--report` (the widest the report may get).
  *
+ * Six more are optional, and only the code viewer reads them:
+ *
+ *   --color-code-comment  --color-code-keyword  --color-code-string
+ *   --color-code-number   --color-code-type     --color-code-function
+ *
+ * Leave them out and the code is legible, lit from the twelve above. Define
+ * them and it is properly lit — a UI palette does not have enough hues for
+ * syntax, and stretching it over six roles gives a muddy result.
+ *
  * Tailwind must also be told to scan this package, or none of the utilities
  * these components name will be generated:
  *
@@ -36,6 +45,8 @@ export { Search, SearchButton, useSearchKey } from './Search.js';
 export { ElevationRail, type Elevation } from './ElevationRail.js';
 export { TimeMachine, type TimeMachineTab } from './TimeMachine.js';
 export { Finding } from './Finding.js';
+export { RuleCard } from './RuleCard.js';
+export { Code, type CodeMark } from './Code.js';
 export { EffectBadges } from './EffectBadges.js';
 export { LevelView } from './LevelView.js';
 export { Analysing, Working, Phases } from './Loading.js';

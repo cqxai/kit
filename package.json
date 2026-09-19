@@ -1,6 +1,6 @@
 {
   "name": "cqx-kit",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",
@@ -49,14 +49,17 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs"
+    "test": "npm run build && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs && node tests/source.mjs"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "typescript": "^5.7.0"
   },
   "publishConfig": {
     "access": "public"
