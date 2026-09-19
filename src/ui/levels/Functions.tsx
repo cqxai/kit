@@ -75,7 +75,9 @@ export function FunctionsLevel({
           {shown.map((f) => {
             const params = f.p.map(([name, written]) => `${name}: ${written}`).join(', ');
             return (
-              <div className={marked.has(f) ? `${CARD} ${FOUND}` : CARD} key={f.id}>
+              <div className={marked.has(f) ? `${CARD} ${FOUND}` : CARD}
+                data-cqx={marked.has(f) ? 'found' : undefined}
+                key={f.id}>
                 <div className="mb-[7px] flex flex-wrap items-baseline gap-2.5">
                   <span className="font-mono text-[13.5px] font-semibold">{f.name}</span>
                   <span className="flex flex-wrap gap-1">

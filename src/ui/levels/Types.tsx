@@ -43,7 +43,8 @@ export function TypesLevel({
               <tr><td colSpan={5} className={`${TD} ${DIM}`}>No types in scope.</td></tr>
             ) : (
               shown.map((t) => (
-                <tr key={t.id} className={marked.has(t) ? `${TR} ${TR_FOUND}` : TR}>
+                <tr key={t.id} className={marked.has(t) ? `${TR} ${TR_FOUND}` : TR}
+                  data-cqx={marked.has(t) ? 'found' : undefined}>
                   <td className={TD}><b>{t.name}</b></td>
                   <td className={`${TD} ${DIM}`}>{t.k}</td>
                   <td className={`${TD} ${ACC}`}>{t.pkg ?? ''}</td>

@@ -44,6 +44,7 @@ export function ElevationRail({
         <button
           key={l.id}
           className={ITEM}
+          data-cqx="elevation"
           aria-current={l.id === current}
           onClick={() => onSelect(l.id)}
         >
