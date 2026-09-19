@@ -54,7 +54,12 @@ export async function loadCatalog(): Promise<Catalog> {
     const entries = (raw.entries ?? []).filter((e) => e && typeof e.repo === 'string');
     return {
       entries,
-      default: raw.default ?? entries[0]?.repo ?? null,
+      // Absent means "work it out"; present and null means "there is no
+      // default", which is a real answer. `??` could not tell them apart, so
+      // a deployment that said it had no default repository was given the
+      // first one it happened to list as a suggestion — and its home link
+      // went there ever after.
+      default: 'default' in raw ? (raw.default ?? null) : (entries[0]?.repo ?? null),
       store: raw.store ?? null,
       brand: raw.brand ?? null,
     };
