@@ -1,0 +1,87 @@
+# Publishing cqx-kit, without a token.
+#
+# npm's trusted publishing trades a long-lived secret for a short-lived OIDC
+# identity: npm is told, once, that this repository publishing from this
+# workflow file in this environment is allowed to, and the registry then
+# verifies a signed claim GitHub mints per run. Nothing here is a secret, and
+# there is no NODE_AUTH_TOKEN to leak, rotate or forget to rotate.
+#
+# Three things have to agree with what was registered on npm, or the publish
+# is rejected: the repository, this file's name, and the environment. Renaming
+# this file breaks publishing — npm pins `publish.yml`, and the connection
+# cannot be edited afterwards, only deleted and remade.
+
+name: publish
+
+on:
+  release:
+    types: [published]
+  # A publish that can only be triggered by cutting a release is a publish that
+  # cannot be retried when it fails for a reason that has nothing to do with
+  # the release. This is the retry.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Registered with npm as part of the trust. It is also the gate: anything
+    # required by the `release` environment — a reviewer, a branch rule — has
+    # to pass before this job gets an identity at all.
+    environment: release
+    permissions:
+      contents: read
+      # What mints the OIDC token npm verifies. Without it the publish fails
+      # with an authentication error that says nothing about this line.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing landed in npm 11.5.1. Whatever Node ships with is
+      # whatever it ships with, so the version that matters is pinned here
+      # rather than inherited.
+      - run: npm install -g npm@^11.5.1
+
+      - run: npm ci
+
+      - name: The tag and the manifest must agree
+        if: github.event_name == 'release'
+        run: |
+          tag='${{ github.event.release.tag_name }}'
+          manifest="v$(node -p 'require("./package.json").version')"
+          if [ "$tag" != "$manifest" ]; then
+            echo "::error::release is tagged $tag but package.json says $manifest"
+            exit 1
+          fi
+
+      - run: npm run typecheck
+
+      - run: npm run build
+
+      # `tsc` exiting zero does not mean the output runs: TypeScript will
+      # happily emit `import './policy'` without an extension, which Node
+      # refuses at runtime and which nothing else in this pipeline would
+      # notice. So the built package is imported the way a consumer imports
+      # it, and asked a question only a working module can answer.
+      - name: The built package must actually import
+        run: |
+          node --input-type=module -e "
+            import { policy, CQX_VERSION } from './dist/engine/index.js';
+            if (!policy?.readers) throw new Error('policy did not load');
+            if (!/^v\d+\.\d+\.\d+$/.test(CQX_VERSION)) {
+              throw new Error('CQX_VERSION is not a version: ' + CQX_VERSION);
+            }
+            console.log('imports clean — cqx ' + CQX_VERSION + ', ' + policy.readers + ' readers');
+          "
+
+      # No token: the identity is the OIDC claim, and provenance is attached
+      # from it. `prepublishOnly` builds again, which is cheap and keeps a
+      # local `npm publish` honest.
+      - run: npm publish
