@@ -2,3 +2,6 @@ node_modules/
 dist/
 *.tsbuildinfo
 .DS_Store
+
+# npm pack, when testing the real tarball in a consumer before publishing.
+*.tgz

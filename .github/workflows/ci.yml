@@ -1,0 +1,30 @@
+# What has to be true before anything is published, on every change rather
+# than only at a release — a package that two applications depend on should
+# not discover a break at the moment it is being shipped.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: typecheck · build · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      # `npm test` builds first and then runs against `dist`, because what a
+      # consumer imports is the built artifact and the one bug this package
+      # has already shipped was visible only there.
+      - run: npm test

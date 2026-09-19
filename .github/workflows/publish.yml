@@ -63,7 +63,8 @@ jobs:
 
       - run: npm run typecheck
 
-      - run: npm run build
+      # Builds, then runs the ranker against what was built.
+      - run: npm test
 
       # `tsc` exiting zero does not mean the output runs: TypeScript will
       # happily emit `import './policy'` without an extension, which Node
