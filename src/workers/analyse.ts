@@ -22,7 +22,8 @@
  * a commit and a commit does not change, so it can never be stale.
  */
 
-import { CQX_VERSION, policy } from '../engine/policy.js';
+import { policy } from '../engine/policy.js';
+import { heldEntry, hold, type Held } from '../engine/held.js';
 import { Analysis } from '../engine/cqx.js';
 import { fetchSource, fetchTree, type SourceFile, type Tree, type TreeEntry } from '../engine/github.js';
 import type { ReaderIn, ReaderOut } from './read.js';
@@ -63,56 +64,19 @@ type Incoming = Request | { type: 'readers'; ports: MessagePort[] };
 
 const post = (reply: Reply) => self.postMessage(reply);
 
-/** Bumped when the shape changes, so an old dataset is not read as a new one. */
 /**
- * v2 because v1 may hold datasets built while every file in a repository
- * carried the first file's contents — a tree whose entries named their blob
- * `blob` rather than `sha` gave them all one cache key. Those datasets are
- * wrong and cannot be told apart from right ones, so the whole store is left
- * behind rather than trusted.
- */
-const DATASETS = 'cqx-datasets-v2';
-
-/**
- * A commit, and the version of cqx that read it.
+ * Where a finished analysis is kept, and where one is looked for first.
  *
- * The version was in the sentence above this line and not in the key, which
- * meant an engine upgrade went on serving whatever the previous one computed
- * — the same commit, read by a different analyser, indistinguishable from a
- * current answer. A dataset is only true of the cqx that produced it, which is
- * exactly why the address in the bucket carries `?v=` as well.
- *
- * The cost of putting it back is one re-analysis per repository per release,
- * paid by people who had cached one. The cost of leaving it out is a score
- * nobody can account for.
+ * Both halves live in `engine/held.ts`, because the page reads the same
+ * entries this writes — a second implementation of the address is how the two
+ * stop agreeing about what is cached.
  */
-const key = (repo: string, sha: string) =>
-  `https://cqx.invalid/dataset/${CQX_VERSION}/${repo}/${sha}`;
-
 async function remembered(repo: string, sha: string): Promise<Reply | null> {
-  try {
-    const hit = await (await caches.open(DATASETS)).match(key(repo, sha));
-    if (!hit) return null;
-    const out = (await hit.json()) as Measured;
-    return { type: 'done', ...out, fetch: out.fetch ?? 0, readers: out.readers ?? 1, held: out.held ?? 0 };
-  } catch {
-    // Private windows, blocked storage, a cache that misbehaves: analyse it.
-    return null;
-  }
+  const out = await heldEntry(repo, sha);
+  return out ? { type: 'done', ...out } : null;
 }
 
-async function remember(repo: string, sha: string, out: Measured) {
-  try {
-    await (await caches.open(DATASETS)).put(
-      key(repo, sha),
-      new Response(JSON.stringify(out), {
-        headers: { 'content-type': 'application/json' },
-      }),
-    );
-  } catch {
-    // Storage full or unavailable. Nothing here depends on it.
-  }
-}
+const remember = (repo: string, sha: string, out: Measured) => hold(repo, sha, out as Held);
 
 /** What a run cost, whichever way it was read. */
 interface Measured {

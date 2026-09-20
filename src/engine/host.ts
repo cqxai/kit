@@ -37,6 +37,22 @@ export interface Host {
    * reads everything from source.
    */
   store: string | null;
+
+  /**
+   * Told when a commit had to be read in this tab, because neither this
+   * browser nor the store had it.
+   *
+   * The fact, and only the fact: a repository and a commit. What this browser
+   * computed is good enough for the person looking at it and is not evidence
+   * of anything — what a repository scores, for everybody else, is decided by
+   * a machine nobody can reach. So this says *that* a commit was visited cold,
+   * and a trusted worker does the same work properly and publishes it.
+   *
+   * Optional, and never awaited. A deployment with nowhere to send it leaves
+   * it out, and a deployment whose endpoint is down is not a deployment whose
+   * reports fail.
+   */
+  cold?: (repo: string, sha: string) => void;
 }
 
 let installed: Host | null = null;

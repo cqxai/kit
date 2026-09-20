@@ -40,7 +40,7 @@ export type {
 
 export { band, EFFECT_LABEL, EFFECT_ORDER } from './types.js';
 
-export { install, type Host } from './host.js';
+export { install, host, type Host } from './host.js';
 
 // `cqx.js` is deliberately not re-exported. Its `Analysis` is the wasm
 // instance wrapper and only the worker bodies ever hold one — and the name is
@@ -66,6 +66,8 @@ export {
 export { useStore, loadIndex, loadDataset, type RepoIndex } from './store.js';
 
 export { sourceOf, sourceHeld } from './source.js';
+
+export { heldDataset, holdDataset } from './held.js';
 
 export { freshPackages, packageEdges, edgeId, type Fresh } from './diff.js';
 

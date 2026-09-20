@@ -5,6 +5,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   install,
   type Host,
+  heldDataset,
+  holdDataset,
+  host,
   policy,
   type Commit,
   type Dataset,
@@ -290,14 +293,37 @@ export function useRepo(host: () => Host): Repo {
     // repository, and a page that empties itself to fetch its replacement
     // flashes the whole of its content on every click.
     setStage(null);
-    loadDataset(source, at)
-      .then(async (found) => {
-        if (!live) return found;
-        if (found) return found;
-        // Nothing published for this commit. It may be off the rail, or the
-        // repository may simply never have been exported — either way the
-        // source is still there to read.
+    // Three places, in this order, and the order is the whole of the policy.
+    //
+    //   1. this browser — what it already holds, however it came by it
+    //   2. the store — what a trusted machine published
+    //   3. the analysis — read the repository again, in this tab
+    //
+    // It used to be 2 then 3, with 1 consulted only from inside 3. That cost
+    // a network round trip on every visit to a repository the store holds,
+    // because nothing from the store was ever written here; and a request and
+    // a 404 before the local answer was looked for on one it does not.
+    heldDataset(source, at)
+      .then(async (mine) => {
+        if (!live) return mine;
+        if (mine) return mine;
+        const published = await loadDataset(source, at);
+        // Keep what the store gave us. It is immutable — it names one commit
+        // and one version of cqx — so the next visit has no reason to ask.
+        if (published) {
+          void holdDataset(source, at, published);
+          return published;
+        }
+        // Nothing anywhere. The source is still there to read, and this tab
+        // reads it — but the fact that it had to is worth telling somebody,
+        // so that the next reader does not repeat it. The fact only: what
+        // this browser computes stays in this browser.
         const sha = timeline.find((c) => c.short === at)?.sha ?? at;
+        try {
+          host().cold?.(source, sha);
+        } catch {
+          // A deployment's reporting is not allowed to break its reports.
+        }
         try {
           return await liveDataset(source, sha, (s) => { if (live) setStage(s); });
         } finally {
