@@ -277,6 +277,14 @@ export function useRepo(host: () => Host): Repo {
 
   useEffect(() => {
     if (!source || !at) return;
+    // Already on screen. The timeline is in this effect's dependencies
+    // because resolving a short ref to the commit it names needs it — and the
+    // timeline changes shape once more after it first arrives, when the
+    // commits GitHub lists are merged into the ones CI published. That second
+    // change re-ran this and fetched the same dataset a second time: 460KB
+    // re-read and re-parsed, and every derived view rebuilt, for a report
+    // already sitting on the page.
+    if (shownAt === at && data) return;
     let live = true;
     // Deliberately not clearing the report: the commit is changing, not the
     // repository, and a page that empties itself to fetch its replacement
@@ -326,7 +334,7 @@ export function useRepo(host: () => Host): Repo {
       })
       .catch((e: Error) => { if (live) setError(e.message); });
     return () => { live = false; };
-  }, [source, at, timeline]);
+  }, [source, at, timeline, shownAt, data]);
 
   useEffect(() => {
     // An address without a commit is not a stable address, so once the head is
