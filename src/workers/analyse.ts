@@ -22,7 +22,7 @@
  * a commit and a commit does not change, so it can never be stale.
  */
 
-import { policy } from '../engine/policy.js';
+import { CQX_VERSION, policy } from '../engine/policy.js';
 import { Analysis } from '../engine/cqx.js';
 import { fetchSource, fetchTree, type SourceFile, type Tree, type TreeEntry } from '../engine/github.js';
 import type { ReaderIn, ReaderOut } from './read.js';
@@ -73,8 +73,21 @@ const post = (reply: Reply) => self.postMessage(reply);
  */
 const DATASETS = 'cqx-datasets-v2';
 
-/** A commit, and the version of cqx that read it. */
-const key = (repo: string, sha: string) => `https://cqx.invalid/dataset/${repo}/${sha}`;
+/**
+ * A commit, and the version of cqx that read it.
+ *
+ * The version was in the sentence above this line and not in the key, which
+ * meant an engine upgrade went on serving whatever the previous one computed
+ * — the same commit, read by a different analyser, indistinguishable from a
+ * current answer. A dataset is only true of the cqx that produced it, which is
+ * exactly why the address in the bucket carries `?v=` as well.
+ *
+ * The cost of putting it back is one re-analysis per repository per release,
+ * paid by people who had cached one. The cost of leaving it out is a score
+ * nobody can account for.
+ */
+const key = (repo: string, sha: string) =>
+  `https://cqx.invalid/dataset/${CQX_VERSION}/${repo}/${sha}`;
 
 async function remembered(repo: string, sha: string): Promise<Reply | null> {
   try {
