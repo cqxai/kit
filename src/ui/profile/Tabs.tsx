@@ -42,7 +42,7 @@ export function Tabs({
       data-cqx="tabs"
       data-parked="false"
       data-compact="false"
-      className="group sticky top-[var(--head)] z-20 rounded-b-[3px] border border-t-rule-soft border-rule bg-panel data-[parked=true]:shadow-[0_1px_6px_rgba(0,0,0,.18)]"
+      className="group sticky top-[var(--cqx-head,var(--head))] z-20 rounded-b-[3px] border border-t-rule-soft border-rule bg-panel data-[parked=true]:shadow-[0_1px_6px_rgba(0,0,0,.18)]"
     >
       {/* It lives in the gutter the full-size one vacates, and arrives only
           once that has actually happened — so the gutter is never empty and

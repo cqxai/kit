@@ -1,7 +1,29 @@
 'use client';
 
-import type { Commit, Dataset, Package, RepoMeta, View } from '../../engine/index.js';
+import type { Analysis, Commit, Dataset, Package, RepoMeta, View } from '../../engine/index.js';
 import { Score } from '../Score.js';
+
+
+/**
+ * Milliseconds as seconds, to one place — except below a tenth, where one
+ * place would round a real measurement down to nothing.
+ */
+const seconds = (ms: number): string => (ms / 1000).toFixed(ms < 100 ? 2 : 1);
+
+const spent = (a: Analysis): string =>
+  typeof a.ms === 'number' ? seconds(a.ms + (a.fetch ?? 0)) : '0.0';
+
+const breakdown = (a: Analysis): string =>
+  [
+    a.fetch ? `${seconds(a.fetch)}s fetching` : null,
+    typeof a.ms === 'number'
+      ? `${seconds(a.ms)}s analysing${(a.readers ?? 1) > 1 ? ` across ${a.readers} threads` : ''}`
+      : null,
+    a.held ? `${Math.round(a.held / 1e6).toLocaleString()} MB per reader` : null,
+    a.cqx ? `cqx ${a.cqx}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
 /** A titled box on the left column. */
 function Box({
@@ -147,16 +169,33 @@ export function Side({
             {data.files.length.toLocaleString()} files · {data.totals.lines.toLocaleString()} lines
           </Fact>
         ) : null}
+        {/* Where the reading came from and what it cost. The report says this
+            in its header; here there is a cover in the way, and this is where
+            a reader looks for provenance anyway.
+
+            The whole wait, not the parse. Nothing can be analysed before it
+            has been read, and reporting only the analysis tells a reader they
+            waited a third of what they did — a dataset that came from the
+            store carries no fetch of its own, which is why the published
+            repositories are quick. The split is on the hover. */}
         <Fact glyph="⟳">
-          Read at{' '}
-          <a
-            className="text-accent hover:underline"
-            href={`https://github.com/${repo}${at ? `/commit/${at}` : ''}`}
-            target="_blank"
-            rel="noopener"
-          >
-            {at ?? 'head'}
-          </a>
+          <span data-cqx="analysis">
+            Read at{' '}
+            <a
+              className="text-accent hover:underline"
+              href={`https://github.com/${repo}${at ? `/commit/${at}` : ''}`}
+              target="_blank"
+              rel="noopener"
+            >
+              {at ?? 'head'}
+            </a>
+            {data?.analysis ? (
+              <>
+                {' · analyzed in '}
+                <b title={breakdown(data.analysis)}>{spent(data.analysis)}</b>s
+              </>
+            ) : null}
+          </span>
         </Fact>
       </Box>
 

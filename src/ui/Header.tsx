@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 import type { Brand, Catalog, Dataset, View } from '../engine/index.js';
 import { RepoInput } from './RepoInput.js';
 import { SearchButton } from './Search.js';
@@ -66,15 +68,53 @@ export function Header({
   data,
   onGo,
   onSearch,
+  totals = true,
 }: {
   catalog: Catalog | null;
   source: string;
   data: Dataset | null;
   onGo: (patch: Partial<View>) => void;
   onSearch: () => void;
+  /**
+   * Whether the bar carries the size of what was read.
+   *
+   * The report says it here because the report has nowhere else: it opens on
+   * the score and the reader has no other way to know how much was read to
+   * produce it. The profile has a cover with the same numbers written across
+   * it, and a page that says a thing twice in two places within 200px has not
+   * decided which one is the answer.
+   */
+  totals?: boolean;
 }) {
+  // The bar publishes its own height as `--cqx-head`, and anything that has to
+  // sit directly under it reads that rather than the declared `--head`.
+  //
+  // They are not the same number. `--head` is a length the deployment writes
+  // down once, and this bar's contents wrap at narrow widths and change height
+  // when they do — so a written-down number is right at one width and too big
+  // or too small at every other. On cqx.bio it was 69px against a bar that
+  // renders 57, which left an eleven-pixel strip between the header and the
+  // parked tab row for the page to scroll through.
+  //
+  // Observed rather than measured once, because the wrap happens on resize and
+  // also when the totals finish arriving and get wider.
+  const bar = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        '--cqx-head',
+        `${Math.round(el.getBoundingClientRect().height)}px`,
+      );
+    publish();
+    const watch = new ResizeObserver(publish);
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, []);
+
   return (
-    <header className="border-b border-rule side:sticky side:top-0 side:z-20 side:bg-ground">
+    <header ref={bar} className="border-b border-rule side:sticky side:top-0 side:z-20 side:bg-ground">
       <div className="mx-auto flex max-w-none flex-wrap items-center gap-3.5 py-3.5 pl-2.5 pr-5">
         {/* Whose deployment this is, if it said. The mark is deka's on
             explorer.deka.gg and absent on a directory somebody exported of
@@ -107,49 +147,51 @@ export function Header({
         {/* Only once there is something to search. An empty palette over an
             empty page is chrome pretending to be a feature. */}
         {data ? <SearchButton onOpen={onSearch} /> : null}
-        {/* Always present, so the top of the page does not appear and
-            disappear on every click. Zero is what is known so far. */}
-        {/* Right-aligned and reserved: the numbers change width as they are
-            learned, and without a floor the whole line slides. */}
-        <span data-cqx="totals" className="ml-auto text-right font-mono text-[12px] tabular-nums text-ink-faint side:min-w-[34ch] [&_b]:font-semibold [&_b]:text-ink">
-          <b>{(data?.totals.nodes ?? 0).toLocaleString()}</b> nodes ·{' '}
-          <b>{(data?.totals.edges ?? 0).toLocaleString()}</b> edges ·{' '}
-          <b>{(data?.totals.lines ?? 0).toLocaleString()}</b> lines
-          {/* One number, and it is the whole wait. Nothing can be parsed
-              before it has been read, so reporting only the parse tells a
-              reader they waited a third of what they did. A dataset from the
-              store carries no fetch of its own — the reading happened in CI,
-              which is why the published repositories are quick. The split is
-              on the hover. */}
-          {' · analyzed in '}
-          <b
-            title={
-              data?.analysis
-                ? [
-                    data.analysis.fetch ? `${seconds(data.analysis.fetch)}s fetching` : null,
-                    typeof data.analysis.ms === 'number'
-                      ? `${seconds(data.analysis.ms)}s analysing${
-                          (data.analysis.readers ?? 1) > 1
-                            ? ` across ${data.analysis.readers} threads`
-                            : ''
-                        }`
-                      : null,
-                    data.analysis.held
-                      ? `${Math.round(data.analysis.held / 1e6).toLocaleString()} MB per reader`
-                      : null,
-                    data.analysis.cqx ? `cqx ${data.analysis.cqx}` : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')
-                : undefined
-            }
-          >
-            {typeof data?.analysis?.ms === 'number'
-              ? seconds(data.analysis.ms + (data.analysis.fetch ?? 0))
-              : '0.0'}
-          </b>
-          s
-        </span>
+        {/* Present whenever it is present at all, so the top of the page does
+            not appear and disappear on every click. Zero is what is known so
+            far. Right-aligned and reserved: the numbers change width as they
+            are learned, and without a floor the whole line slides. */}
+        {totals ? (
+          <span data-cqx="totals" className="ml-auto text-right font-mono text-[12px] tabular-nums text-ink-faint side:min-w-[34ch] [&_b]:font-semibold [&_b]:text-ink">
+            <b>{(data?.totals.nodes ?? 0).toLocaleString()}</b> nodes ·{' '}
+            <b>{(data?.totals.edges ?? 0).toLocaleString()}</b> edges ·{' '}
+            <b>{(data?.totals.lines ?? 0).toLocaleString()}</b> lines
+            {/* One number, and it is the whole wait. Nothing can be parsed
+                before it has been read, so reporting only the parse tells a
+                reader they waited a third of what they did. A dataset from the
+                store carries no fetch of its own — the reading happened in CI,
+                which is why the published repositories are quick. The split is
+                on the hover. */}
+            {' · analyzed in '}
+            <b
+              title={
+                data?.analysis
+                  ? [
+                      data.analysis.fetch ? `${seconds(data.analysis.fetch)}s fetching` : null,
+                      typeof data.analysis.ms === 'number'
+                        ? `${seconds(data.analysis.ms)}s analysing${
+                            (data.analysis.readers ?? 1) > 1
+                              ? ` across ${data.analysis.readers} threads`
+                              : ''
+                          }`
+                        : null,
+                      data.analysis.held
+                        ? `${Math.round(data.analysis.held / 1e6).toLocaleString()} MB per reader`
+                        : null,
+                      data.analysis.cqx ? `cqx ${data.analysis.cqx}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : undefined
+              }
+            >
+              {typeof data?.analysis?.ms === 'number'
+                ? seconds(data.analysis.ms + (data.analysis.fetch ?? 0))
+                : '0.0'}
+            </b>
+            s
+          </span>
+        ) : null}
       </div>
     </header>
   );

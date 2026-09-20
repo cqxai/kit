@@ -38,7 +38,7 @@ export function Card({
     <article
       data-cqx="card"
       id={id}
-      className="mb-3 rounded-[3px] border border-rule bg-panel scroll-mt-[calc(var(--head)+62px)]"
+      className="mb-3 rounded-[3px] border border-rule bg-panel scroll-mt-[calc(var(--cqx-head,var(--head))+62px)]"
     >
       <div className="flex items-start gap-2.5 px-3 pb-1.5 pt-3">
         <span className="mt-px shrink-0">{mark}</span>

@@ -112,7 +112,7 @@ export function Feed({
   return (
     <>
       {grouped.map((era, i) => (
-        <section key={era.id} id={era.id} className="scroll-mt-[calc(var(--head)+62px)]">
+        <section key={era.id} id={era.id} className="scroll-mt-[calc(var(--cqx-head,var(--head))+62px)]">
           {/* A label centred on a rule. Both halves are flexible, so it
               centres on the line rather than sitting at a measured offset. */}
           <h3 className="m-0 mb-3 mt-[22px] flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-faint before:h-px before:flex-1 before:bg-rule before:content-[''] after:h-px after:flex-1 after:bg-rule after:content-[''] first:mt-0">

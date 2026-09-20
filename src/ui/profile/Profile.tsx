@@ -153,6 +153,9 @@ export function Profile({ host }: { host: () => Host }) {
           data={data}
           onGo={go}
           onSearch={() => setSearching(true)}
+          // The cover carries the same numbers, 200px below and larger. Two
+          // places saying it is a page that has not decided which is the answer.
+          totals={false}
         />
       </div>
 

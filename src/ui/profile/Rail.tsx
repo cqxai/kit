@@ -47,7 +47,7 @@ export function Rail({ stops }: { stops: Stop[] }) {
   return (
     <nav
       data-cqx="rail"
-      className="sticky top-[calc(var(--head)+54px)] hidden self-start pl-2.5 side:block"
+      className="sticky top-[calc(var(--cqx-head,var(--head))+54px)] hidden self-start pl-2.5 side:block"
       aria-label="History"
     >
       <p className="m-0 mb-1.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.07em] text-ink-faint">
