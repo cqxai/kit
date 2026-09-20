@@ -17,7 +17,7 @@ import { Analysing, Working } from '../Loading.js';
 import { EMPTY } from '../classes.js';
 import { Cover } from './Cover.js';
 import { Tabs, type Rung } from './Tabs.js';
-import { Feed, eras } from './Feed.js';
+import { Feed } from './Feed.js';
 import { Rail } from './Rail.js';
 import { Side } from './Side.js';
 import { RailSkeleton } from './Skeleton.js';
@@ -106,16 +106,34 @@ export function Profile({ host }: { host: () => Host }) {
     [timeline],
   );
 
-  const stops = useMemo(
-    () =>
-      eras(timeline, releases).map((era) => ({
-        id: era.id,
-        label: era.label,
-        when: era.when,
-        tagged: era.entries[0]?.kind === 'release',
-      })),
-    [timeline, releases],
-  );
+  // One stop per commit, not per release. A release is a thing that happened
+  // to a commit, so it takes that commit's place on the menu the same way it
+  // takes its place in the feed — and a repository that releases at a normal
+  // rate still gets a menu, which the by-release version did not: tokio had no
+  // tagged commit in its twenty most recent and the whole history was one item.
+  const tagged = useMemo(() => {
+    const at = new Map<string, string>();
+    for (const r of releases ?? []) if (r.sha) at.set(r.sha.slice(0, 8), r.tag);
+    return at;
+  }, [releases]);
+
+  const stops = useMemo(() => {
+    let last: string | null = null;
+    return timeline.map((c) => {
+      // The date only where it changes. Twenty commits from one afternoon
+      // repeating the same date twenty times is a column of noise with the
+      // one thing that distinguishes them — the commit — set smaller than it.
+      const day = c.date.slice(0, 10);
+      const when = day === last ? null : c.date;
+      last = day;
+      return {
+        id: `at-${c.short}`,
+        label: tagged.get(c.short) ?? c.short,
+        when,
+        tagged: tagged.has(c.short),
+      };
+    });
+  }, [timeline, tagged]);
 
   const contributors = useMemo(() => {
     const seen: string[] = [];

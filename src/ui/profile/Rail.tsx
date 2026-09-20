@@ -13,10 +13,22 @@ export type Stop = { id: string; label: string; when: string | null; tagged: boo
  * inside it — putting it in the card would make it part of the page rather
  * than a way around the page. So it is a sibling of the column, not a child.
  *
- * It follows the feed and the feed follows it. Which era is current is the
- * last one whose heading has passed the top of the window: scrolling up
- * through a tall card should not hand the mark back early. One position, not
- * a range — lighting up four at once says the reader is in four places.
+ * **One stop per commit**, with a tag shown in place of the sha where the
+ * commit carries one. It was one stop per *release* to begin with, which
+ * looked right on the repositories it was built against — deka and dsc tag a
+ * canary on nearly every push, so every few commits produced another entry.
+ * On a repository that releases at a normal rate it collapsed: tokio had no
+ * tagged commit anywhere in the twenty most recent, so the entire history read
+ * "Since the last release" and the menu was one item long.
+ *
+ * The lesson is narrow and worth keeping: the menu is a way through the feed,
+ * so it is made of what the feed is made of. Releases are a thing that happens
+ * *to* a commit, and the feed already says so in the commit's own card.
+ *
+ * It follows the feed and the feed follows it. Which stop is current is the
+ * last one whose card has passed the top of the window: scrolling up through a
+ * tall card should not hand the mark back early. One position, not a range —
+ * lighting up four at once says the reader is in four places.
  */
 export function Rail({ stops }: { stops: Stop[] }) {
   const [here, setHere] = useState<string | null>(stops[0]?.id ?? null);
