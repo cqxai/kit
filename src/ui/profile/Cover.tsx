@@ -67,7 +67,12 @@ export function Cover({
   faceRef,
 }: {
   repo: string;
-  meta: RepoMeta | null;
+  /**
+   * Partial, because a server holds some of this and not the rest — a
+   * description and a licence, but no star count. Every use is optional
+   * already; the type now says so.
+   */
+  meta: Partial<RepoMeta> | null;
   crates: number;
   files: number;
   lines: number;

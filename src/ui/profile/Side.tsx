@@ -97,6 +97,8 @@ export function Side({
   repo,
   meta,
   data,
+  size,
+  scores: known,
   at,
   commit,
   packages,
@@ -105,8 +107,20 @@ export function Side({
   onGo,
 }: {
   repo: string;
-  meta: RepoMeta | null;
+  /** Partial for the same reason as the cover's — see the note there. */
+  meta: Partial<RepoMeta> | null;
   data: Dataset | null;
+  /**
+   * What was read, when something has read it. Passed in rather than counted
+   * off the dataset so that a server which knows the three numbers — and has
+   * no dataset — can say them too.
+   */
+  size?: { crates: number; files: number; lines: number } | null;
+  /**
+   * The scores a server already knew, drawn until the dataset arrives with
+   * the same numbers and the deltas that go under them.
+   */
+  scores?: Record<string, number> | null;
   at: string | null;
   commit: Commit | null;
   packages: Package[];
@@ -115,7 +129,9 @@ export function Side({
   waiting: boolean;
   onGo: (patch: Partial<View>) => void;
 }) {
-  const scores = data ? Object.entries(data.score.scores) : [];
+  // The dataset wins when it is here: it is the same measurement, and it
+  // carries the deltas the server's copy does not.
+  const scores = Object.entries(data ? data.score.scores : (known ?? {}));
   const biggest = [...packages].sort((a, b) => b.lines - a.lines).slice(0, 6);
 
   return (
@@ -179,7 +195,10 @@ export function Side({
             Licensed <b>{meta.license}</b>
           </Fact>
         ) : null}
-        {meta ? (
+        {/* Only once GitHub has answered. A server knows a description and a
+            licence; the age and the following are not in our database and a
+            half-drawn fact reads worse than a missing one. */}
+        {meta?.created !== undefined && meta.stars !== undefined ? (
           <Fact glyph="◷">
             Started{' '}
             <b>
@@ -191,11 +210,11 @@ export function Side({
             · {meta.stars.toLocaleString()} {meta.stars === 1 ? 'star' : 'stars'}
           </Fact>
         ) : null}
-        {waiting && !data ? <Fact glyph="≡"><Bar w="66%" h={9} /></Fact> : null}
-        {data ? (
+        {waiting && !size ? <Fact glyph="≡"><Bar w="66%" h={9} /></Fact> : null}
+        {size ? (
           <Fact glyph="≡">
-            <b>{data.packages.length.toLocaleString()} crates</b> ·{' '}
-            {data.files.length.toLocaleString()} files · {data.totals.lines.toLocaleString()} lines
+            <b>{size.crates.toLocaleString()} crates</b> ·{' '}
+            {size.files.toLocaleString()} files · {size.lines.toLocaleString()} lines
           </Fact>
         ) : null}
         {/* Where the reading came from and what it cost. The report says this

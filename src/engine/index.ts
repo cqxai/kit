@@ -60,6 +60,7 @@ export {
   type SourceFile,
   type Progress,
   type ReleaseRef,
+  type Known,
   type RepoMeta,
 } from './github.js';
 

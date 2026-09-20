@@ -73,7 +73,20 @@ export type Repo = {
   main: React.RefObject<HTMLElement | null>;
 };
 
-export function useRepo(host: () => Host): Repo {
+/**
+ * `seed` is the address, as a server already parsed it.
+ *
+ * Without one this hook knows nothing until it has mounted and read
+ * `location`, so a server renders a page with no repository on it — which is
+ * what cqx.bio shipped: fourteen kilobytes of HTML saying "Nothing to open".
+ * A deployment that knows the path before it renders passes it here and the
+ * first render is the right one, on the server and in the browser both.
+ *
+ * Optional because the desktop application has no server to parse anything,
+ * and because a page under a single-page fallback is served from an address
+ * the build never saw.
+ */
+export function useRepo(host: () => Host, seed?: View | null): Repo {
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   // The timeline and the commit are fetched separately on purpose: the timeline
   // is one small file that changes, and a commit is a large one that never
@@ -111,7 +124,7 @@ export function useRepo(host: () => Host): Repo {
   const [timelineTrouble, setTimelineTrouble] = useState<string | null>(null);
   // One object rather than five pieces of state, because the URL describes all
   // of it at once and they have to stay in step.
-  const [view, setView] = useState<View>(() => defaultView(''));
+  const [view, setView] = useState<View>(() => seed ?? defaultView(''));
   const { repo: source } = view;
 
   /** Changes the view and records it, so back returns here. */
@@ -145,20 +158,35 @@ export function useRepo(host: () => Host): Repo {
     // at import because it reads `location`, and this renders on a server
     // too — where there is none.
     install(host());
+
+    // The address, read now rather than when a manifest comes back.
+    //
+    // This used to sit inside the `then` below, which meant the page did not
+    // know which repository it was showing until a network round trip had
+    // finished — and on a deployment with no manifest that round trip returns
+    // nothing, after paying for itself in full. The name, the cover and the
+    // whole header waited behind a fetch that had no opinion about them.
+    //
+    // An address always wins. The manifest says what to open *with*, not what
+    // is allowed: a repository nobody listed is still a repository, so it is
+    // only consulted when the address names none.
+    //
+    // Replaces the history entry rather than adding one — arriving on a link
+    // should not take two backs to leave.
+    const fromUrl = parsePath(window.location.pathname, window.location.hash, '');
+    if (fromUrl.repo) {
+      setView((current) => (sameView(current, fromUrl) ? current : fromUrl));
+      window.history.replaceState(fromUrl, '', toPath(fromUrl));
+    }
+
     loadCatalog().then((found) => {
       if (!live) return;
       useStore(found.store);
       setCatalog(found);
-      // The first render has to match the server's, so the URL is read after
-      // mounting rather than during it, and replaces that entry instead of
-      // adding one — arriving on a link should not take two backs to leave.
-      //
-      // An address always wins. The manifest says what to open with, not what
-      // is allowed: a repository nobody listed is still a repository.
-      const fromUrl = parsePath(window.location.pathname, window.location.hash, '');
-      const resolved = fromUrl.repo ? fromUrl : { ...fromUrl, repo: found.default ?? '' };
+      if (fromUrl.repo || !found.default) return;
+      const resolved = { ...fromUrl, repo: found.default };
       setView(resolved);
-      if (resolved.repo) window.history.replaceState(resolved, '', toPath(resolved));
+      window.history.replaceState(resolved, '', toPath(resolved));
     });
 
     const onPop = () =>
@@ -172,6 +200,13 @@ export function useRepo(host: () => Host): Repo {
 
   useEffect(() => {
     if (!source) return;
+    // Nothing may be fetched before the manifest has answered, because the
+    // manifest is what says *where from*: a deployment that exported its
+    // datasets beside itself declares `/data`, and a fetch issued before that
+    // is heard goes to the shared store and misses. Reading the address no
+    // longer waits for this — only reading bytes does, which is the part that
+    // genuinely depends on it.
+    if (!catalog) return;
     let live = true;
     // Read before anything is cleared, while the previous report is still up.
     setHeld(main.current?.offsetHeight ?? null);
@@ -202,7 +237,7 @@ export function useRepo(host: () => Host): Repo {
         if (live) setReleases({ of: source, list: [], trouble: e.message });
       });
     return () => { live = false; };
-  }, [source]);
+  }, [source, catalog]);
 
   // Newest first: the first entry is head, each one after it a commit further back.
   const repoIndex = index?.of === source ? index.timeline : null;

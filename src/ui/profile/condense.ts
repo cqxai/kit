@@ -28,8 +28,14 @@ export function useCondense(
   firstTab: RefObject<HTMLElement | null>,
 ): void {
   useEffect(() => {
+    // A server-rendered cover cannot be handed a ref — it was created before
+    // this component existed. The element is the same either way, and it
+    // already carries the attribute the browser tests assert against.
+    const found = () =>
+      face.current ?? (document.querySelector('[data-cqx="face"]') as HTMLElement | null);
+
     const frame = () => {
-      const f = face.current;
+      const f = found();
       const r = row.current;
       if (!f || !r) return;
       const fr = f.getBoundingClientRect();

@@ -466,3 +466,34 @@ export async function fetchSource(
   await Promise.all(Array.from({ length: Math.max(1, Math.min(lanes, queue.length)) }, worker));
   return files;
 }
+
+/**
+ * What a server already knew about a repository, before this browser fetched
+ * anything.
+ *
+ * Everything here is otherwise learned in the browser — the description from
+ * GitHub, the scores from a five-megabyte dataset — and both of those arrive
+ * after a render. That is fine for a reader, who waits half a second, and
+ * useless to a crawler, which does not wait at all, and to an assistant that
+ * never runs the JavaScript that would fetch them.
+ *
+ * A deployment with a server fills this in from whatever it holds and passes
+ * it to `Profile`. Every field is optional because a server may know some of
+ * it and not the rest, and because a deployment with no server — the desktop
+ * application — passes none of it and behaves exactly as it always has.
+ *
+ * It is a floor, never a ceiling: the moment the real dataset arrives it wins,
+ * because it is the same measurement taken more precisely.
+ *
+ * ANYTHING HERE THAT CAME FROM GITHUB IS UNTRUSTED. `description` in
+ * particular is written by whoever owns the repository and reaches a page with
+ * no review in between.
+ */
+export interface Known extends Partial<RepoMeta> {
+  /** The commit the server resolved, which is not always the tip of a branch. */
+  sha?: string | null;
+  scores?: Record<string, number> | null;
+  lines?: number | null;
+  files?: number | null;
+  crates?: number | null;
+}

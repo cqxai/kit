@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   fetchMeta,
+  parsePath,
   type Host,
+  type Known,
   type LevelId,
   type RepoMeta,
   type View,
@@ -42,7 +44,36 @@ import { useCondense } from './condense.js';
  * in this page's frame: one commit, at whatever depth was asked for. They are
  * not redesigned here, and are meant to be.
  */
-export function Profile({ host }: { host: () => Host }) {
+export function Profile({
+  host,
+  known,
+  path,
+}: {
+  host: () => Host;
+  /**
+   * What a server already knew, and this browser has not learned yet.
+   *
+   * The header is the part of this page a crawler needs, an assistant that
+   * does not run JavaScript reads, and a reader should not have to watch
+   * assemble itself — and it is also the part that needs no browser. A
+   * deployment with a server looks it up and passes it here; the components
+   * draw it immediately, and hand over to the real dataset the moment it
+   * lands.
+   *
+   * Absent on a deployment with no server. The desktop application is a Next
+   * app with nowhere to run a query, and it renders exactly as before.
+   */
+  known?: Known | null;
+  /**
+   * The address, as the server received it.
+   *
+   * Without this the page cannot know which repository it is showing until it
+   * has mounted and read `location` — so a server renders "Nothing to open",
+   * which is what every crawler was being served. Parsed with the same
+   * function the browser uses, so the two cannot drift.
+   */
+  path?: string | null;
+}) {
   const {
     catalog,
     data,
@@ -59,7 +90,7 @@ export function Profile({ host }: { host: () => Host }) {
     error,
     held,
     main,
-  } = useRepo(host);
+  } = useRepo(host, path ? parsePath(path, '', '') : null);
   const { repo: source, level } = view;
   const [searching, setSearching] = useState(false);
   useSearchKey(() => setSearching(true));
@@ -78,7 +109,10 @@ export function Profile({ host }: { host: () => Host }) {
       .catch(() => {});
     return () => { live = false; };
   }, [source]);
-  const about = meta?.of === source ? meta.meta : null;
+  // GitHub's answer when it arrives, the server's when it has not. Both
+  // describe the same repository; one is simply more recent.
+  const about: Partial<RepoMeta> | null =
+    meta?.of === source ? meta.meta : (known ?? null);
 
   const face = useRef<HTMLElement>(null);
   const row = useRef<HTMLDivElement>(null);
@@ -163,6 +197,16 @@ export function Profile({ host }: { host: () => Host }) {
 
   const commit = timeline[viewing] ?? null;
 
+  // What was read, from whichever source has it. The dataset is the precise
+  // answer; the server's snapshot is the same three numbers, written down when
+  // a machine that could be trusted computed them.
+  const size =
+    data
+      ? { crates: data.packages.length, files: data.files.length, lines: data.totals.lines }
+      : typeof known?.lines === 'number'
+        ? { crates: known.crates ?? 0, files: known.files ?? 0, lines: known.lines }
+        : null;
+
   return (
     <div className="font-display text-[13px] leading-[1.42]">
       <Search data={data} open={searching} onClose={() => setSearching(false)} onGo={go} />
@@ -197,9 +241,9 @@ export function Profile({ host }: { host: () => Host }) {
               <Cover
                 repo={source}
                 meta={about}
-                crates={data?.packages.length ?? 0}
-                files={data?.files.length ?? 0}
-                lines={data?.totals.lines ?? 0}
+                crates={size?.crates ?? 0}
+                files={size?.files ?? 0}
+                lines={size?.lines ?? 0}
                 packages={data?.packages ?? []}
                 faceRef={face}
               />
@@ -225,11 +269,16 @@ export function Profile({ host }: { host: () => Host }) {
                       repo={source}
                       meta={about}
                       data={data}
-                      at={shownAt}
+                      size={size}
+                      scores={known?.scores ?? null}
+                      at={shownAt ?? known?.sha?.slice(0, 8) ?? null}
                       commit={commit}
                       packages={data?.packages ?? []}
                       contributors={contributors}
-                      waiting={!data && !error}
+                      // Not waiting for what we already have. The skeleton
+                      // rings stand in for an unanswered question, and a
+                      // server that handed us the scores has answered it.
+                      waiting={!data && !error && !known?.scores}
                       onGo={go}
                     />
                     <div className="min-w-0">
