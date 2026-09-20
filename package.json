@@ -1,6 +1,6 @@
 {
   "name": "cqx-kit",
-  "version": "0.6.9",
+  "version": "0.7.0",
   "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",

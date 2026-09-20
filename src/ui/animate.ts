@@ -22,8 +22,22 @@ const still = () =>
 const ease = (t: number) => 1 - (1 - t) ** 3;
 
 export function useEased(target: number, ms = 800): number {
-  // Starts at nothing, so the first paint is a sweep rather than a jump.
-  const [shown, setShown] = useState(still() ? target : 0);
+  // Starts at the answer, not at nothing.
+  //
+  // It started at nothing, so that the first paint was a sweep. On a server
+  // there is no window, `still()` is false, and the first paint was therefore
+  // a dial reading **0** — baked into the HTML, which is what a crawler and
+  // an assistant that does not run JavaScript would read as this
+  // repository's CodeQuality Score. Nothing is a better answer than zero;
+  // the true number is better than either.
+  //
+  // The sweep is not lost, it is moved to where it means something: a target
+  // that *changes* still eases, which is every step through the time machine
+  // and every commit clicked on the rail. What no longer animates is a value
+  // that was already correct when the component mounted — and a number
+  // animating up from zero to the figure it was already showing is a worse
+  // thing than no animation at all.
+  const [shown, setShown] = useState(target);
   // Where this run began, which is wherever the last one was interrupted —
   // clicking through commits should not restart the sweep from zero each time.
   const live = useRef(shown);

@@ -1,7 +1,15 @@
-'use client';
-
-import { useMemo } from 'react';
-
+/**
+ * No `'use client'`, deliberately.
+ *
+ * Nothing here needs a browser: it is a name, a sentence and an SVG derived
+ * from a list. That makes it renderable on a server, which is what puts a
+ * repository's identity into the HTML for a crawler, an assistant that does
+ * not execute JavaScript, and a reader before hydration.
+ *
+ * It is equally renderable in a client tree, which the desktop application
+ * needs — it is a Next app with no server at all. A component that assumes
+ * neither works in both.
+ */
 import { packageEdges, type Package, type RepoMeta } from '../../engine/index.js';
 
 /**
@@ -66,7 +74,9 @@ export function Cover({
   packages: Package[];
   faceRef: React.RefObject<HTMLElement | null>;
 }) {
-  const { nodes, edges } = useMemo(() => art(packages), [packages]);
+  // Was a `useMemo`. Deterministic and cheap — the cost of recomputing it
+  // is smaller than the cost of not being able to render it on a server.
+  const { nodes, edges } = art(packages);
   const owner = repo.split('/')[0] ?? '';
 
   return (

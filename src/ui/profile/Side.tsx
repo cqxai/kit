@@ -1,5 +1,8 @@
-'use client';
-
+/**
+ * No `'use client'`. Facts and dials, both of which a server can draw — see
+ * the note in Cover for why that matters and why it must keep working in a
+ * client tree too.
+ */
 import type { Analysis, Commit, Dataset, Package, RepoMeta, View } from '../../engine/index.js';
 import { Score } from '../Score.js';
 import { Bar, DialSkeleton } from './Skeleton.js';
