@@ -132,21 +132,6 @@ export function Feed({
             </span>
           </h3>
 
-          {/* The findings sit under the newest heading, because that is what
-              they are true of: the commit on screen. */}
-          {i === 0
-            ? firing.map((rule) => (
-                <FiringCard
-                  key={rule.rule}
-                  rule={rule}
-                  config={data?.score.config.rules[rule.rule]}
-                  repo={repo}
-                  at={at}
-                  when={era.when ? day(era.when) : ''}
-                />
-              ))
-            : null}
-
           {era.entries.map((entry) =>
             entry.kind === 'release' ? (
               <ReleaseCard
@@ -171,6 +156,31 @@ export function Feed({
               />
             ),
           )}
+
+          {/* The findings are true of the commit on screen, so they belong
+              under the newest heading — but they arrive later than the
+              timeline does, and they are tall, because they carry code.
+              Rendered above the commits they were inserted into a page
+              somebody was already reading and shoved all of it down: one
+              layout shift of 0.23, which is most of a failing Core Web
+              Vital on its own.
+              
+              Below them, the same cards append past the fold. A shift only
+              counts against a page when it moves something a reader can
+              see, so arriving late costs nothing here and everything two
+              elements higher. */}
+          {i === 0
+            ? firing.map((rule) => (
+                <FiringCard
+                  key={rule.rule}
+                  rule={rule}
+                  config={data?.score.config.rules[rule.rule]}
+                  repo={repo}
+                  at={at}
+                  when={era.when ? day(era.when) : ''}
+                />
+              ))
+            : null}
         </section>
       ))}
     </>

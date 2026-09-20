@@ -117,11 +117,16 @@ export function Side({
 
   return (
     <div>
+      {/* A fixed height across both states. The skeleton rings and the real
+          dials are not the same size — the dials carry a delta under them —
+          so the box grew by 62px when the dataset landed and took the whole
+          left column with it. Reserved rather than matched, because the
+          delta is only there on some commits. */}
       <Box title="CodeQuality Score" note={at ? `at ${at}` : undefined}>
         {/* Three across, not however many fit. Five categories in a 340px
             column wrap four-then-one, which reads as one of them having been
             singled out. */}
-        <div className="grid grid-cols-3 justify-items-center gap-y-2">
+        <div className="grid min-h-[196px] grid-cols-3 content-start justify-items-center gap-y-2">
           {/* Rings, not a sentence. "Not scored at this commit" was being said
               for the two seconds before the dataset arrived, which is a claim
               about the repository made before anything was known about it. */}
