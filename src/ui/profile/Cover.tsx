@@ -94,10 +94,15 @@ export function Cover({
           </g>
         </svg>
         {/* Bottom right, out of the way of the name and the avatar. */}
-        <span data-cqx="size" className="absolute bottom-2.5 right-3 font-mono text-[10.5px] tracking-[0.03em] text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,.5)]">
-          {crates.toLocaleString()} crates · {files.toLocaleString()} files ·{' '}
-          {lines.toLocaleString()} lines
-        </span>
+        {/* Nothing rather than three zeroes. "0 crates · 0 files · 0 lines" is
+            a measurement, and it is the wrong one — it says the repository is
+            empty when what is true is that it has not been read yet. */}
+        {lines > 0 ? (
+          <span data-cqx="size" className="absolute bottom-2.5 right-3 font-mono text-[10.5px] tracking-[0.03em] text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,.5)]">
+            {crates.toLocaleString()} crates · {files.toLocaleString()} files ·{' '}
+            {lines.toLocaleString()} lines
+          </span>
+        ) : null}
       </div>
 
       {/* Round. There is no winning the argument against circular avatars. */}

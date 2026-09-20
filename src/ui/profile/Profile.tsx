@@ -20,6 +20,7 @@ import { Tabs, type Rung } from './Tabs.js';
 import { Feed, eras } from './Feed.js';
 import { Rail } from './Rail.js';
 import { Side } from './Side.js';
+import { RailSkeleton } from './Skeleton.js';
 import { useCondense } from './condense.js';
 
 /**
@@ -50,6 +51,7 @@ export function Profile({ host }: { host: () => Host }) {
     timeline,
     earlier,
     releases,
+    timelineTrouble,
     viewing,
     view,
     go,
@@ -199,14 +201,6 @@ export function Profile({ host }: { host: () => Host }) {
                 className="mt-8 min-h-[60vh] max-side:mt-3"
                 style={held && !data ? { minHeight: held } : undefined}
               >
-                {!data && !stage ? (
-                  <div className={EMPTY}>
-                    Loading {source}
-                    {at ? ` at ${at}` : ''}…
-                  </div>
-                ) : null}
-                {stage ? <Analysing repo={source} at={at} stage={stage} /> : null}
-
                 {level === 'L0' ? (
                   <div className="grid items-start gap-3 side:grid-cols-[340px_minmax(0,1fr)]">
                     <Side
@@ -217,9 +211,21 @@ export function Profile({ host }: { host: () => Host }) {
                       commit={commit}
                       packages={data?.packages ?? []}
                       contributors={contributors}
+                      waiting={!data && !error}
                       onGo={go}
                     />
                     <div className="min-w-0">
+                      {/* Real progress where there is real progress to report.
+                          A repository nobody has published is being read here,
+                          in this tab, and that takes as long as it takes — a
+                          skeleton would be pretending it is nearly done. The
+                          phases say what is happening and the clock says how
+                          long it has been, which is the honest pair. */}
+                      {stage ? (
+                        <div className="mb-3">
+                          <Analysing repo={source} at={at} stage={stage} />
+                        </div>
+                      ) : null}
                       <Feed
                         repo={source}
                         avatar={avatar}
@@ -228,11 +234,21 @@ export function Profile({ host }: { host: () => Host }) {
                         data={data}
                         at={shownAt}
                         scored={scored}
+                        waiting={!stage && !error && !timelineTrouble}
                         onGo={go}
                       />
                     </div>
                   </div>
-                ) : data ? (
+                ) : !data ? (
+                  stage ? (
+                    <Analysing repo={source} at={at} stage={stage} />
+                  ) : (
+                    <div className={EMPTY}>
+                      Loading {source}
+                      {at ? ` at ${at}` : ''}…
+                    </div>
+                  )
+                ) : (
                   /* The other elevations are the report's own views, in this
                      page's frame. They have not been redesigned for a profile
                      and are meant to be — what is here is true, which is the
@@ -259,13 +275,15 @@ export function Profile({ host }: { host: () => Host }) {
                       onGo={go}
                     />
                   </div>
-                ) : null}
+                )}
               </main>
             </>
           )}
         </div>
 
-        {level === 'L0' ? <Rail stops={stops} /> : null}
+        {level === 'L0' ? (
+          stops.length === 0 && !error && !timelineTrouble ? <RailSkeleton /> : <Rail stops={stops} />
+        ) : null}
       </div>
     </div>
   );

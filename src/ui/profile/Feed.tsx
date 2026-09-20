@@ -6,6 +6,7 @@ import type { Commit, Dataset, ReleaseRef, View } from '../../engine/index.js';
 import { ReleaseCard } from '../cards/Release.js';
 import { CommitCard } from '../cards/Commit.js';
 import { FiringCard } from '../cards/Firing.js';
+import { FeedSkeleton } from './Skeleton.js';
 
 /** One day, written the way a person says it. */
 export const day = (iso: string): string =>
@@ -75,6 +76,7 @@ export function Feed({
   data,
   at,
   scored,
+  waiting,
   onGo,
 }: {
   repo: string;
@@ -85,6 +87,8 @@ export function Feed({
   at: string | null;
   /** The commits cqx has actually published a report for. */
   scored: Set<string>;
+  /** The timeline has not arrived, so its absence means nothing yet. */
+  waiting: boolean;
   onGo: (patch: Partial<View>) => void;
 }) {
   const grouped = useMemo(() => eras(timeline, releases), [timeline, releases]);
@@ -101,7 +105,11 @@ export function Feed({
     [data],
   );
 
+  // A repository with no history is a real answer and this used to give it
+  // two seconds early, every time, to every repository — while the timeline
+  // was still being fetched. A reader does not read that as "still working".
   if (grouped.length === 0) {
+    if (waiting) return <FeedSkeleton />;
     return (
       <p className="rounded-[3px] border border-rule bg-panel px-4 py-6 text-center text-ink-faint">
         Nothing to show yet — this repository has no history here.

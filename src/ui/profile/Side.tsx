@@ -2,6 +2,7 @@
 
 import type { Analysis, Commit, Dataset, Package, RepoMeta, View } from '../../engine/index.js';
 import { Score } from '../Score.js';
+import { Bar, DialSkeleton } from './Skeleton.js';
 
 
 /**
@@ -97,6 +98,7 @@ export function Side({
   commit,
   packages,
   contributors,
+  waiting,
   onGo,
 }: {
   repo: string;
@@ -106,6 +108,8 @@ export function Side({
   commit: Commit | null;
   packages: Package[];
   contributors: string[];
+  /** Nothing has arrived yet, so nothing may be asserted about it. */
+  waiting: boolean;
   onGo: (patch: Partial<View>) => void;
 }) {
   const scores = data ? Object.entries(data.score.scores) : [];
@@ -118,8 +122,17 @@ export function Side({
             column wrap four-then-one, which reads as one of them having been
             singled out. */}
         <div className="grid grid-cols-3 justify-items-center gap-y-2">
+          {/* Rings, not a sentence. "Not scored at this commit" was being said
+              for the two seconds before the dataset arrived, which is a claim
+              about the repository made before anything was known about it. */}
           {scores.length === 0 ? (
-            <p className="m-0 py-3 text-[12.5px] text-ink-faint">Not scored at this commit.</p>
+            waiting ? (
+              [0, 1, 2, 3, 4].map((i) => <DialSkeleton key={i} />)
+            ) : (
+              <p className="col-span-3 m-0 py-3 text-[12.5px] text-ink-faint">
+                Not scored at this commit.
+              </p>
+            )
           ) : (
             scores.map(([key, value]) => (
               <Score
@@ -141,6 +154,13 @@ export function Side({
             history.
           </span>
         </Fact>
+        {waiting && !meta ? (
+          <>
+            <Fact glyph="◆"><Bar w="58%" h={9} /></Fact>
+            <Fact glyph="§"><Bar w="40%" h={9} /></Fact>
+            <Fact glyph="◷"><Bar w="72%" h={9} /></Fact>
+          </>
+        ) : null}
         {meta?.language ? (
           <Fact glyph="◆">
             Written in <b>{meta.language}</b>
@@ -163,6 +183,7 @@ export function Side({
             · {meta.stars.toLocaleString()} {meta.stars === 1 ? 'star' : 'stars'}
           </Fact>
         ) : null}
+        {waiting && !data ? <Fact glyph="≡"><Bar w="66%" h={9} /></Fact> : null}
         {data ? (
           <Fact glyph="≡">
             <b>{data.packages.length.toLocaleString()} crates</b> ·{' '}
