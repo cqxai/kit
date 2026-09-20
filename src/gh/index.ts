@@ -60,6 +60,8 @@ const SHA = /^[0-9a-f]{7,40}$/;
 /** A commit does not change, so its tree is true for good. The other two
  *  describe a repository as it is now, which is a different kind of fact. */
 const BRIEFLY = 60_000;
+/** A repository's own description changes when somebody edits it. */
+const DAILY = 86_400_000;
 
 /**
  * Bumped whenever the shape of what is kept changes.
@@ -294,6 +296,49 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
         }));
         await keep(gate, key, commits);
         return json(commits, 60);
+      }
+
+      // What GitHub knows about the repository itself: the sentence under
+      // the name, the licence, the star count, when it started. A profile
+      // opens with all four and none of them are in a dataset — cqx reads
+      // code, and none of this is code.
+      //
+      // Held for a day. A description changes when somebody edits it, which
+      // is not an event worth a request per reader.
+      if (what === 'meta') {
+        const key = `cache/${SHAPE}/${repo}/meta.json`;
+        const kept = await held<unknown>(gate, key, DAILY);
+        if (kept) return json(kept, 3600);
+        const raw = await ask<{
+          description: string | null;
+          stargazers_count: number;
+          language: string | null;
+          homepage: string | null;
+          created_at: string;
+          pushed_at: string;
+          default_branch: string;
+          license: { spdx_id: string | null; name: string } | null;
+          owner: { avatar_url: string; login: string };
+        }>(gate, `/repos/${repo}`);
+        const meta = {
+          description: raw.description,
+          stars: raw.stargazers_count,
+          language: raw.language,
+          homepage: raw.homepage,
+          created: raw.created_at,
+          pushed: raw.pushed_at,
+          branch: raw.default_branch,
+          // `NOASSERTION` is what GitHub returns for a licence file it could
+          // not identify, and showing it would be worse than showing nothing.
+          license:
+            raw.license && raw.license.spdx_id && raw.license.spdx_id !== 'NOASSERTION'
+              ? raw.license.spdx_id
+              : null,
+          avatar: raw.owner.avatar_url,
+          owner: raw.owner.login,
+        };
+        await keep(gate, key, meta);
+        return json(meta, 3600);
       }
 
       if (what === 'releases') {

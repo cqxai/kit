@@ -75,8 +75,22 @@ function viaWorker(): Promise<boolean> {
   return proxied;
 }
 
-/** Asks the worker, and falls back to GitHub when there is no worker. */
-async function metered<T>(path: string, direct: string): Promise<T> {
+/**
+ * Asks the worker, and falls back to GitHub when there is no worker.
+ *
+ * The worker answers in cqx's shapes, not GitHub's: it trims a tree of deno
+ * from a quarter of a megabyte to what a file list needs, and it renames the
+ * fields nobody outside GitHub would have called those things. So when there
+ * is no worker, GitHub's own answer has to be put into the same shape here or
+ * the same function returns two different things depending on where it is
+ * deployed — which is the kind of difference that only shows up on the
+ * deployment nobody tests.
+ */
+async function metered<T>(
+  path: string,
+  direct: string,
+  shape?: (raw: unknown) => T,
+): Promise<T> {
   if (await viaWorker()) {
     const response = await fetch(`/gh/${path}`);
     if (response.ok) return (await response.json()) as T;
@@ -85,7 +99,8 @@ async function metered<T>(path: string, direct: string): Promise<T> {
     const why = await response.json().catch(() => ({ error: `worker ${response.status}` }));
     throw new Error((why as { error?: string }).error ?? `worker ${response.status}`);
   }
-  return api<T>(`${API}${direct}`);
+  const raw = await api<unknown>(`${API}${direct}`);
+  return shape ? shape(raw) : (raw as T);
 }
 
 async function api<T>(url: string): Promise<T> {
@@ -173,6 +188,67 @@ async function cachedList<T>(
     if (stale) return stale.items.slice(0, count);
     throw e;
   }
+}
+
+/**
+ * What GitHub knows about the repository that is not in its code.
+ *
+ * A report needs none of this — it is about the code at a commit. A profile
+ * is a page about a project, and a project has a sentence, a licence, an age
+ * and a following. None of that is derivable from a dataset, so it is asked
+ * for, once, and held for an hour.
+ */
+export interface RepoMeta {
+  description: string | null;
+  stars: number;
+  language: string | null;
+  homepage: string | null;
+  /** ISO. When the repository was created, which is not its first commit. */
+  created: string;
+  pushed: string;
+  branch: string;
+  /** SPDX, or null when GitHub could not identify one. */
+  license: string | null;
+  avatar: string;
+  owner: string;
+}
+
+const META = 'cqx-meta-v1';
+
+export async function fetchMeta(repo: string): Promise<RepoMeta> {
+  const list = await cachedList<RepoMeta>(META, `https://cqx/meta/${repo}`, 1, async () => [
+    await metered<RepoMeta>(`${repo}/meta`, `/repos/${repo}`, (raw) => {
+      const r = raw as {
+        description: string | null;
+        stargazers_count: number;
+        language: string | null;
+        homepage: string | null;
+        created_at: string;
+        pushed_at: string;
+        default_branch: string;
+        license: { spdx_id: string | null } | null;
+        owner: { avatar_url: string; login: string };
+      };
+      return {
+        description: r.description,
+        stars: r.stargazers_count,
+        language: r.language,
+        homepage: r.homepage,
+        created: r.created_at,
+        pushed: r.pushed_at,
+        branch: r.default_branch,
+        // `NOASSERTION` is GitHub's answer for a licence file it could not
+        // identify, and printing it would be worse than printing nothing.
+        license:
+          r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,
+        avatar: r.owner.avatar_url,
+        owner: r.owner.login,
+      };
+    }),
+  ]);
+  const found = list[0];
+  if (!found) throw new Error(`No metadata for ${repo}`);
+  return found;
 }
 
 /** The commits a time machine offers, newest first. One request at most. */

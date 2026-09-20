@@ -38,7 +38,20 @@
  * Two breakpoints are assumed: `side`, where the menu becomes a column
  * beside the report, and `wide`, where the report itself holds two columns.
  */
-export { Explorer } from './Explorer.js';
+/**
+ * Two shells, one engine.
+ *
+ * `Report` is a repository at one commit, read once: the viewer the CLI opens
+ * on a folder, a one-off report on a private repository, a directory somebody
+ * exported. `Profile` is a repository somebody comes back to — a page with a
+ * history, a feed and a front. They share `useRepo`, so they can never
+ * disagree about which commit is being read.
+ */
+export { Report } from './Report.js';
+/** @deprecated The report's name before there were two shells. */
+export { Report as Explorer } from './Report.js';
+export { Profile } from './profile/Profile.js';
+export { useRepo, type Repo } from './useRepo.js';
 export { Score, BAND, toneOf, type Band } from './Score.js';
 export { ThemePicker } from './Theme.js';
 export { Search, SearchButton, useSearchKey } from './Search.js';
@@ -50,6 +63,8 @@ export { Code, type CodeMark } from './Code.js';
 export { EffectBadges } from './EffectBadges.js';
 export { Graph, type GraphNode, type GraphEdge } from './Graph.js';
 export { LevelView } from './LevelView.js';
+export { Header } from './Header.js';
+export * from './cards/index.js';
 export { Analysing, Working, Phases } from './Loading.js';
 export { RepoInput, asRepo } from './RepoInput.js';
 export * as classes from './classes.js';

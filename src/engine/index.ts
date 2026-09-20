@@ -54,11 +54,13 @@ export {
   fetchSource,
   fetchCommits,
   fetchReleases,
+  fetchMeta,
   type Tree,
   type TreeEntry,
   type SourceFile,
   type Progress,
   type ReleaseRef,
+  type RepoMeta,
 } from './github.js';
 
 export { useStore, loadIndex, loadDataset, type RepoIndex } from './store.js';
