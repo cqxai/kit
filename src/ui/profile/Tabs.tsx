@@ -39,6 +39,7 @@ export function Tabs({
   return (
     <div
       ref={rowRef}
+      data-cqx="tabs"
       data-parked="false"
       data-compact="false"
       className="group sticky top-[var(--head)] z-20 rounded-b-[3px] border border-t-rule-soft border-rule bg-panel data-[parked=true]:shadow-[0_1px_6px_rgba(0,0,0,.18)]"
@@ -46,7 +47,7 @@ export function Tabs({
       {/* It lives in the gutter the full-size one vacates, and arrives only
           once that has actually happened — so the gutter is never empty and
           never holds two of the same face. */}
-      <span className="pointer-events-none absolute left-4 top-1/2 z-[1] flex translate-y-[calc(-50%+9px)] items-center gap-[9px] opacity-0 transition-[opacity,transform] duration-200 ease-out group-data-[compact=true]:translate-y-[-50%] group-data-[compact=true]:opacity-100 motion-reduce:transition-none max-side:hidden">
+      <span data-cqx="compact" className="pointer-events-none absolute left-4 top-1/2 z-[1] flex translate-y-[calc(-50%+9px)] items-center gap-[9px] opacity-0 transition-[opacity,transform] duration-200 ease-out group-data-[compact=true]:translate-y-[-50%] group-data-[compact=true]:opacity-100 motion-reduce:transition-none max-side:hidden">
         <span className="box-border block h-7 w-7 rounded-full bg-white p-0.5">
           <img className="block h-full w-full rounded-full object-cover" src={avatar} alt="" />
         </span>

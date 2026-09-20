@@ -72,7 +72,7 @@ export function Cover({
   return (
     /* It does not clip: the avatar is meant to break its lower edge and hang
        over the tab row. The image clips itself instead. */
-    <div className="relative border border-b-0 border-rule bg-panel">
+    <div data-cqx="cover" className="relative border border-b-0 border-rule bg-panel">
       {/* Dark in every theme, and not from the palette. A cover is a
           photograph's slot: the name and the caption are laid over it in
           white, and a ground that follows a light theme leaves both of them
@@ -103,6 +103,7 @@ export function Cover({
       {/* Round. There is no winning the argument against circular avatars. */}
       <span
         ref={faceRef as React.RefObject<HTMLSpanElement>}
+        data-cqx="face"
         className="absolute bottom-[-60px] left-4 z-30 box-border block h-[100px] w-[100px] rounded-full bg-white p-1 shadow-[0_1px_3px_rgba(0,0,0,.28)] side:h-[100px] side:w-[100px] max-side:bottom-2.5 max-side:h-[72px] max-side:w-[72px] max-side:z-[5]"
       >
         <img

@@ -36,6 +36,7 @@ export function Card({
 }) {
   return (
     <article
+      data-cqx="card"
       id={id}
       className="mb-3 rounded-[3px] border border-rule bg-panel scroll-mt-[calc(var(--head)+62px)]"
     >
