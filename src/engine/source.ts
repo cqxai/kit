@@ -25,7 +25,23 @@ const held = new Map<string, Promise<string[] | null>>();
 /** How much of a file is worth holding. Past this, a viewer is not the tool. */
 const LIMIT = 2_000_000;
 
+/**
+ * Whether a finding's `file` is actually a file.
+ *
+ * Some rules name the thing they found rather than where they found it, and
+ * a symbol path — `tokio::sync::rwlock::…::skip_drop` — arrives in the same
+ * field as `src/lib.rs`. Fetching one produces a 404 against a CDN, a red
+ * line in every reader's console, and a card that waits for source that was
+ * never going to come.
+ *
+ * A path, not a name: Rust's `::` never appears in one, and a file has an
+ * extension or a directory above it.
+ */
+const isPath = (p: string): boolean =>
+  p.length > 0 && !p.includes('::') && (p.includes('/') || /\.[a-z0-9]+$/i.test(p));
+
 export function sourceOf(repo: string, ref: string, path: string): Promise<string[] | null> {
+  if (!isPath(path)) return Promise.resolve(null);
   const key = `${repo}@${ref}:${path}`;
   let waiting = held.get(key);
   if (!waiting) {

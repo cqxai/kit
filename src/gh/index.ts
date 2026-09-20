@@ -57,9 +57,19 @@ const AGENT = 'cqx';
 const REPO = /^[\w.-]{1,39}\/[\w.-]{1,100}$/;
 const SHA = /^[0-9a-f]{7,40}$/;
 
-/** A commit does not change, so its tree is true for good. The other two
- *  describe a repository as it is now, which is a different kind of fact. */
-const BRIEFLY = 60_000;
+/**
+ * A commit does not change, so its tree is true for good. The other two
+ * describe a repository as it is now, which is a different kind of fact.
+ *
+ * Ten minutes rather than one. A minute was chosen when this served a handful
+ * of readers and the only cost of being wrong was a stale rail; under real
+ * traffic it is a standing bill of two GitHub calls per minute per repository
+ * that anybody is looking at, and five thousand an hour does not go far when
+ * it is spent that way. Nothing downstream needs finer than this — the warmer
+ * itself only comes round every five minutes — so the freshness was being
+ * paid for and never collected.
+ */
+const BRIEFLY = 600_000;
 /** A repository's own description changes when somebody edits it. */
 const DAILY = 86_400_000;
 
@@ -282,7 +292,7 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
       if (what === 'commits') {
         const key = `cache/${SHAPE}/${repo}/commits.json`;
         const kept = await held<unknown[]>(gate, key, BRIEFLY);
-        if (kept) return json(kept, 60);
+        if (kept) return json(kept, 600);
         const raw = await ask<
           { sha: string; commit: { message: string; author: { name: string; date: string } } }[]
         >(gate, `/repos/${repo}/commits?per_page=20`);
@@ -295,7 +305,7 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
           date: c.commit.author.date,
         }));
         await keep(gate, key, commits);
-        return json(commits, 60);
+        return json(commits, 600);
       }
 
       // What GitHub knows about the repository itself: the sentence under
@@ -361,7 +371,7 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
       if (what === 'releases') {
         const key = `cache/${SHAPE}/${repo}/releases.json`;
         const kept = await held<unknown[]>(gate, key, BRIEFLY);
-        if (kept) return json(kept, 60);
+        if (kept) return json(kept, 600);
 
         const raw = await ask<
           { tag_name: string; published_at: string; draft: boolean; prerelease: boolean }[]
@@ -378,7 +388,7 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
           prerelease: r.prerelease,
         }));
         await keep(gate, key, releases);
-        return json(releases, 60);
+        return json(releases, 600);
       }
 
       if (what === 'tree' && arg) {
