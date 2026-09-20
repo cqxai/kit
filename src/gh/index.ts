@@ -319,6 +319,10 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
           default_branch: string;
           license: { spdx_id: string | null; name: string } | null;
           owner: { avatar_url: string; login: string };
+          topics?: string[];
+          archived?: boolean;
+          fork?: boolean;
+          private?: boolean;
         }>(gate, `/repos/${repo}`);
         const meta = {
           description: raw.description,
@@ -336,6 +340,19 @@ export async function answer(request: Request, gate: Gate): Promise<Response | n
               : null,
           avatar: raw.owner.avatar_url,
           owner: raw.owner.login,
+          // What a project says it is about, in the same request as
+          // everything else — no second call and no preview header. Worth
+          // passing through: a tag is how a reader finds a repository they
+          // cannot name, and how a watchlist gets breadth rather than only
+          // the most-depended-upon crates over and over.
+          topics: raw.topics ?? [],
+          // Three facts that decide whether a repository is worth reading at
+          // all. An archive has stopped changing, a fork is usually somebody
+          // else's work, and a private repository must never reach a public
+          // bucket.
+          archived: raw.archived ?? false,
+          fork: raw.fork ?? false,
+          private: raw.private ?? false,
         };
         await keep(gate, key, meta);
         return json(meta, 3600);

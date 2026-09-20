@@ -211,6 +211,11 @@ export interface RepoMeta {
   license: string | null;
   avatar: string;
   owner: string;
+  /** What the project says it is about. Empty when it has said nothing. */
+  topics?: string[];
+  archived?: boolean;
+  fork?: boolean;
+  private?: boolean;
 }
 
 const META = 'cqx-meta-v1';
@@ -228,6 +233,10 @@ export async function fetchMeta(repo: string): Promise<RepoMeta> {
         default_branch: string;
         license: { spdx_id: string | null } | null;
         owner: { avatar_url: string; login: string };
+        topics?: string[];
+        archived?: boolean;
+        fork?: boolean;
+        private?: boolean;
       };
       return {
         description: r.description,
@@ -243,6 +252,10 @@ export async function fetchMeta(repo: string): Promise<RepoMeta> {
           r.license?.spdx_id && r.license.spdx_id !== 'NOASSERTION' ? r.license.spdx_id : null,
         avatar: r.owner.avatar_url,
         owner: r.owner.login,
+        topics: r.topics ?? [],
+        archived: r.archived ?? false,
+        fork: r.fork ?? false,
+        private: r.private ?? false,
       };
     }),
   ]);
