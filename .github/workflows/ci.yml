@@ -27,4 +27,6 @@ jobs:
       # `npm test` builds first and then runs against `dist`, because what a
       # consumer imports is the built artifact and the one bug this package
       # has already shipped was visible only there.
+      # Build checks committed brand outputs before emitting anything. Do not
+      # regenerate them here: that would silently repair an uncommitted edit.
       - run: npm test

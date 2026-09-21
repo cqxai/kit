@@ -34,29 +34,41 @@ menu is, or how a rule card reads, are two tools.
 to a Response, so a Cloudflare Worker and a Next route handler are each four
 lines around it.
 
+**`cqx-kit/brand`** — the palette, four-stripe mark, graph-paper grid, and
+type scale, generated from [one source](src/brand/tokens.json). Web apps import
+`cqx-kit/brand/brand.css`; React Native imports the object. See the
+[brand contract and adoption examples](src/brand/README.md).
+
 **`cqx-kit/workers/*`** — the analyse and read worker bodies.
 
 ## What a host supplies
 
-Only the palette. These components name colours and faces rather than
-carrying them, so an application supplies the values in its own Tailwind
-theme — twelve colours, two faces, and three lengths. Tailwind must also be
-told to scan the package, or none of the utilities are generated:
+Import the brand stylesheet for colour values, then keep the host's Tailwind
+mapping from `--color-green` to `var(--green)` (and the other named colours).
+The host still loads its fonts, supplies its report layout and motion rules,
+and tells Tailwind to scan the package:
 
 ```css
+@import "cqx-kit/brand/brand.css";
 @source "../node_modules/cqx-kit/dist";
 ```
 
-Six more custom properties are optional, and only the code viewer reads them:
+The brand stylesheet also supplies the six syntax colours read by the code viewer:
 
 ```css
 --color-code-comment  --color-code-keyword  --color-code-string
 --color-code-number   --color-code-type     --color-code-function
 ```
 
-Leave them out and code is legible, lit from the twelve. Define them and it is
-properly lit — a UI palette does not have enough hues for syntax, and
-stretching it over six roles gives a muddy result.
+Hosts with their own palette can still supply these properties themselves.
+
+## Changing the brand
+
+Use Node 24 or later for development. Edit `src/brand/tokens.json`, run
+`npm run brand`, and commit the source and generated `dist/brand` files
+together. `npm run build` and `npm test` check the outputs before compiling;
+they fail on drift instead of regenerating it. `npm run brand:check` runs
+that check alone.
 
 ## Showing code
 
