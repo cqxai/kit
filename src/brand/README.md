@@ -12,14 +12,14 @@ These are existing values, not a new palette or a redesigned scale:
 | Data | Source |
 | --- | --- |
 | Both palettes, including chip and syntax colours | [cqx-bio/app/globals.css](https://github.com/samifouad/cqx-bio/blob/main/app/globals.css) |
-| Fixed stripe, 15px inset, 23px width, equal bands, 6px/10px at ≤720px | The same file's `.stripes` rules |
+| Fixed stripe, flush left, 23px width, equal bands, 10px at ≤720px | Widths from the same file's `.stripes` rules; flush placement follows the desktop app standard |
 | Green, yellow, red, brown order | [cqx-bio/app/icon.svg](https://github.com/samifouad/cqx-bio/blob/main/app/icon.svg) and the issue #1 brief |
-| Opposite-mode stripe palette and inset rationale | [Issue #1](https://github.com/samifouad/cqx-kit/issues/1) and its implementation brief |
+| Opposite-mode stripe palette | [Issue #1](https://github.com/samifouad/cqx-kit/issues/1) and its implementation brief |
 | Grid colours, 28px square spacing, 1px lines | [cqx-desktop/src/app/globals.css](https://github.com/samifouad/cqx-desktop/blob/main/src/app/globals.css) |
 | Camel-cased light/dark colour objects | [cqx-mobileapp/src/theme/colors.ts](https://github.com/samifouad/cqx-mobileapp/blob/main/src/theme/colors.ts) |
 | Display weight/tracking and cycling-label size/weight/tracking | `cqx-bio/app/globals.css`, `.display` and `.cycle` |
 | Body 14px/23px | [cqx-mobileapp/src/components/Type.tsx](https://github.com/samifouad/cqx-mobileapp/blob/main/src/components/Type.tsx) |
-| Wordmark 34px/42px and -1.5px tracking | [cqx-mobileapp/src/components/BrandFrame.tsx](https://github.com/samifouad/cqx-mobileapp/blob/main/src/components/BrandFrame.tsx) |
+| Wide wordmark 34px/42px and -1.5px tracking | [cqx-mobileapp/src/components/BrandFrame.tsx](https://github.com/samifouad/cqx-mobileapp/blob/main/src/components/BrandFrame.tsx) |
 
 The named palette files contain no complete font-size scale. `typeScale`
 therefore records the existing mobile body/wordmark sizes alongside the CSS
@@ -84,8 +84,8 @@ The two opt-in classes apply the mark and grid using the generated properties:
 
 `--band-green` through `--band-brown` use the **opposite** palette. Semantic
 `--green`, `--yellow`, `--red`, and `--brown` follow the theme normally. The
-stripe's inset is part of the mark: ground remains visible on its left so it
-does not read as browser chrome. Both the responsive geometry and band order
+stripe is flush with the left edge because the desktop app is the standard.
+Both the responsive geometry and band order
 are generated; hosts do not need a second copy of either rule.
 
 Type variables follow `--type-<role>-<property>`, for example

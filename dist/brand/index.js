@@ -68,7 +68,7 @@ export const brand = {
     },
     "position": "fixed",
     "insetBlock": 0,
-    "left": 15,
+    "left": 0,
     "width": 23,
     "display": "flex",
     "bandFlex": 1,
@@ -76,10 +76,10 @@ export const brand = {
     "pointerEvents": "none",
     "narrow": {
       "maxWidth": 720,
-      "left": 6,
+      "left": 0,
       "width": 10
     },
-    "insetReason": "Off the edge, not on it: the drawing leaves a strip of ground to the left of the margin, which is what stops it reading as browser chrome."
+    "placementReason": "The stripe is flush with the left edge because the desktop app is the standard."
   },
   "grid": {
     "color": {

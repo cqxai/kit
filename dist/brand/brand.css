@@ -32,7 +32,7 @@
   --band-brown: #a2704c;
   --stripe-position: fixed;
   --stripe-inset-block: 0px;
-  --stripe-left: 15px;
+  --stripe-left: 0px;
   --stripe-width: 23px;
   --stripe-display: flex;
   --stripe-band-flex: 1;
@@ -120,12 +120,12 @@
 
 @media (max-width: 720px) {
   :root {
-    --stripe-left: 6px;
+    --stripe-left: 0px;
     --stripe-width: 10px;
   }
 }
 
-/* Off the edge, not on it: the drawing leaves a strip of ground to the left of the margin, which is what stops it reading as browser chrome. */
+/* The stripe is flush with the left edge because the desktop app is the standard. */
 .cqx-stripes {
   position: var(--stripe-position);
   inset-block: var(--stripe-inset-block);

@@ -28,7 +28,7 @@ test('the public RN export contains the source palettes and numeric dimensions',
   assert.equal(typeScale.cycle.fontSizeEm, 0.74);
 });
 
-test('the stripe selects the opposite palette in mark order, inset at both sizes', () => {
+test('the stripe selects the opposite palette in mark order, flush at both sizes', () => {
   assert.deepEqual(stripe.order, ['green', 'yellow', 'red', 'brown']);
   assert.deepEqual(stripe.palette, { light: 'dark', dark: 'light' });
   assert.deepEqual(stripe.order.map((band) => palette[stripe.palette.dark][band]),
@@ -39,8 +39,8 @@ test('the stripe selects the opposite palette in mark order, inset at both sizes
   assert.equal(stripe.insetBlock, 0);
   assert.equal(stripe.display, 'flex');
   assert.equal(stripe.bandFlex, 1);
-  assert.deepEqual([stripe.left, stripe.width], [15, 23]);
-  assert.deepEqual(stripe.narrow, { maxWidth: 720, left: 6, width: 10 });
+  assert.deepEqual([stripe.left, stripe.width], [0, 23]);
+  assert.deepEqual(stripe.narrow, { maxWidth: 720, left: 0, width: 10 });
 });
 
 test('CSS is exported and marked as a side effect for web bundlers', async () => {

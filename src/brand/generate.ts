@@ -77,7 +77,7 @@ ${theme('dark')}
   }
 }
 
-/* ${stripe.insetReason} */
+/* ${stripe.placementReason} */
 .cqx-stripes {
   position: var(--stripe-position);
   inset-block: var(--stripe-inset-block);
