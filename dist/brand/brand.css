@@ -1,0 +1,151 @@
+/* Generated from src/brand/tokens.json by src/brand/generate.ts. Do not edit; run npm run brand. */
+
+:root {
+  color-scheme: light;
+  --ground: #f6f2e7;
+  --panel: #fbf8f0;
+  --screen: #fdfcf8;
+  --ink: #241c17;
+  --ink-soft: #55483f;
+  --ink-faint: #8a7b6d;
+  --green: #2e7d5b;
+  --yellow: #e0a72e;
+  --red: #c03b2e;
+  --brown: #8a5a3c;
+  --accent: #c03b2e;
+  --rule: #ded2bd;
+  --rule-soft: #e9dfcd;
+  --button: #f0c14e;
+  --button-ink: #241c17;
+  --chip: #211b16;
+  --chip-fg: #4ee08a;
+  --color-code-comment: #9a8c7c;
+  --color-code-keyword: #9b3d6e;
+  --color-code-string: #2e7d5b;
+  --color-code-number: #a5651a;
+  --color-code-type: #1d6a7a;
+  --color-code-function: #3d5a9e;
+  --grid: rgba(36, 28, 23, 0.022);
+  --band-green: #3fa574;
+  --band-yellow: #edbe52;
+  --band-red: #e0594a;
+  --band-brown: #a2704c;
+  --stripe-position: fixed;
+  --stripe-inset-block: 0px;
+  --stripe-left: 15px;
+  --stripe-width: 23px;
+  --stripe-display: flex;
+  --stripe-band-flex: 1;
+  --stripe-z-index: 30;
+  --stripe-pointer-events: none;
+  --grid-size: 28px 28px;
+  --grid-line-width: 1px;
+  --type-body-font-size: 14px;
+  --type-body-line-height: 23px;
+  --type-wordmark-font-size: 34px;
+  --type-wordmark-line-height: 42px;
+  --type-wordmark-letter-spacing: -1.5px;
+  --type-display-font-weight: 800;
+  --type-display-letter-spacing: -0.02em;
+  --type-cycle-font-size: 0.74em;
+  --type-cycle-font-weight: 600;
+  --type-cycle-letter-spacing: -0.02em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #15161a;
+    --panel: #1d1f24;
+    --screen: #0e0f12;
+    --ink: #f2ebdc;
+    --ink-soft: #a9a08f;
+    --ink-faint: #756c5f;
+    --green: #3fa574;
+    --yellow: #edbe52;
+    --red: #e0594a;
+    --brown: #a2704c;
+    --accent: #e0594a;
+    --rule: #2e3037;
+    --rule-soft: #232529;
+    --button: #edbe52;
+    --button-ink: #15161a;
+    --chip: #08090b;
+    --chip-fg: #4ee08a;
+    --color-code-comment: #6d6558;
+    --color-code-keyword: #e48fb8;
+    --color-code-string: #68c79a;
+    --color-code-number: #e6b467;
+    --color-code-type: #68c2d6;
+    --color-code-function: #8fa9e8;
+    --grid: rgba(242, 235, 220, 0.018);
+    --band-green: #2e7d5b;
+    --band-yellow: #e0a72e;
+    --band-red: #c03b2e;
+    --band-brown: #8a5a3c;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #15161a;
+  --panel: #1d1f24;
+  --screen: #0e0f12;
+  --ink: #f2ebdc;
+  --ink-soft: #a9a08f;
+  --ink-faint: #756c5f;
+  --green: #3fa574;
+  --yellow: #edbe52;
+  --red: #e0594a;
+  --brown: #a2704c;
+  --accent: #e0594a;
+  --rule: #2e3037;
+  --rule-soft: #232529;
+  --button: #edbe52;
+  --button-ink: #15161a;
+  --chip: #08090b;
+  --chip-fg: #4ee08a;
+  --color-code-comment: #6d6558;
+  --color-code-keyword: #e48fb8;
+  --color-code-string: #68c79a;
+  --color-code-number: #e6b467;
+  --color-code-type: #68c2d6;
+  --color-code-function: #8fa9e8;
+  --grid: rgba(242, 235, 220, 0.018);
+  --band-green: #2e7d5b;
+  --band-yellow: #e0a72e;
+  --band-red: #c03b2e;
+  --band-brown: #8a5a3c;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --stripe-left: 6px;
+    --stripe-width: 10px;
+  }
+}
+
+/* Off the edge, not on it: the drawing leaves a strip of ground to the left of the margin, which is what stops it reading as browser chrome. */
+.cqx-stripes {
+  position: var(--stripe-position);
+  inset-block: var(--stripe-inset-block);
+  left: var(--stripe-left);
+  width: var(--stripe-width);
+  display: var(--stripe-display);
+  z-index: var(--stripe-z-index);
+  pointer-events: var(--stripe-pointer-events);
+}
+
+.cqx-stripes > span { flex: var(--stripe-band-flex); }
+.cqx-stripes > span:nth-child(1) { background-color: var(--band-green); }
+.cqx-stripes > span:nth-child(2) { background-color: var(--band-yellow); }
+.cqx-stripes > span:nth-child(3) { background-color: var(--band-red); }
+.cqx-stripes > span:nth-child(4) { background-color: var(--band-brown); }
+
+.cqx-grid {
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(to right, var(--grid) var(--grid-line-width), transparent var(--grid-line-width)),
+    linear-gradient(to bottom, var(--grid) var(--grid-line-width), transparent var(--grid-line-width));
+  background-size: var(--grid-size);
+}

@@ -1,5 +1,11 @@
 node_modules/
-dist/
+dist/*
+!dist/brand/
+dist/brand/*
+!dist/brand/brand.css
+!dist/brand/index.js
+!dist/brand/index.d.ts
+.tmp/
 *.tsbuildinfo
 .DS_Store
 
