@@ -63,7 +63,7 @@ export declare const brand: {
     };
     readonly "position": "fixed";
     readonly "insetBlock": 0;
-    readonly "left": 15;
+    readonly "left": 0;
     readonly "width": 23;
     readonly "display": "flex";
     readonly "bandFlex": 1;
@@ -71,10 +71,10 @@ export declare const brand: {
     readonly "pointerEvents": "none";
     readonly "narrow": {
       readonly "maxWidth": 720;
-      readonly "left": 6;
+      readonly "left": 0;
       readonly "width": 10;
     };
-    readonly "insetReason": "Off the edge, not on it: the drawing leaves a strip of ground to the left of the margin, which is what stops it reading as browser chrome.";
+    readonly "placementReason": "The stripe is flush with the left edge because the desktop app is the standard.";
   };
   readonly "grid": {
     readonly "color": {
