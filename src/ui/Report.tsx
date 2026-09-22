@@ -300,7 +300,7 @@ export function Report({ host }: { host: () => Host }) {
                 powered by{' '}
                 <a
                   className="font-mono text-[17px] font-bold tracking-[-0.02em] !text-ink"
-                  href="https://github.com/samifouad/cqx"
+                  href="https://github.com/cqxai/cqx"
                   target="_blank"
                   rel="noopener"
                 >

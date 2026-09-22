@@ -68,7 +68,7 @@ export function install(host: Host): void {
 export function host(): Host {
   if (!installed) {
     throw new Error(
-      'cqx-kit: install() was never called. A page has to say how to make a ' +
+      '@cqxai/kit: install() was never called. A page has to say how to make a ' +
         'worker, where cqx.wasm is, and which store to read — see Host.',
     );
   }

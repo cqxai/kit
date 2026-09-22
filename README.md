@@ -1,4 +1,4 @@
-# cqx-kit
+# @cqxai/kit
 
 The shared engine behind [cqx.bio](https://cqx.bio) and the deka explorer.
 
@@ -7,9 +7,13 @@ decides a repository opens on its latest release and the other opens on its
 latest commit, they are different products that happen to share a name. This
 package is where that decision lives, once.
 
+```sh
+npm install @cqxai/kit
+```
+
 ```ts
-import { policy, band } from 'cqx-kit/engine';
-import type { Dataset, Finding } from 'cqx-kit/engine';
+import { policy, band } from '@cqxai/kit/engine';
+import type { Dataset, Finding } from '@cqxai/kit/engine';
 
 policy.opensAt;      // 'release' — a tag is a thing its authors chose
 policy.readers;      // 4 — eight is not worth four more threads
@@ -19,27 +23,27 @@ band(74);            // 'warn'
 
 ## What is in it
 
-**`cqx-kit/engine`** — everything the explorer knows that has nothing to do
+**`@cqxai/kit/engine`** — everything the explorer knows that has nothing to do
 with how it is drawn: the wasm glue, the worker pool, the GitHub fetching, the
 store, the addressing, the search, and the shapes cqx emits (`Dataset`,
 `Score`, `Rule`, `Finding`, `Package`, `FileNode`, `TypeDecl`, …). `policy`
 holds every default the explorer has an opinion about, each documented with
 the reason it is that number rather than another.
 
-**`cqx-kit/ui`** — the explorer itself, as React components. Structure lives
+**`@cqxai/kit/ui`** — the explorer itself, as React components. Structure lives
 here because it is the product: two deployments that disagree about where the
 menu is, or how a rule card reads, are two tools.
 
-**`cqx-kit/gh`** — a runtime-agnostic GitHub proxy: a function from a Request
+**`@cqxai/kit/gh`** — a runtime-agnostic GitHub proxy: a function from a Request
 to a Response, so a Cloudflare Worker and a Next route handler are each four
 lines around it.
 
-**`cqx-kit/brand`** — the palette, four-stripe mark, graph-paper grid, and
+**`@cqxai/kit/brand`** — the palette, four-stripe mark, graph-paper grid, and
 type scale, generated from [one source](src/brand/tokens.json). Web apps import
-`cqx-kit/brand/brand.css`; React Native imports the object. See the
+`@cqxai/kit/brand/brand.css`; React Native imports the object. See the
 [brand contract and adoption examples](src/brand/README.md).
 
-**`cqx-kit/workers/*`** — the analyse and read worker bodies.
+**`@cqxai/kit/workers/*`** — the analyse and read worker bodies.
 
 ## What a host supplies
 
@@ -49,8 +53,8 @@ The host still loads its fonts, supplies its report layout and motion rules,
 and tells Tailwind to scan the package:
 
 ```css
-@import "cqx-kit/brand/brand.css";
-@source "../node_modules/cqx-kit/dist";
+@import "@cqxai/kit/brand/brand.css";
+@source "../node_modules/@cqxai/kit/dist";
 ```
 
 The brand stylesheet also supplies the six syntax colours read by the code viewer:

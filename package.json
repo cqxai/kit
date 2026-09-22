@@ -1,15 +1,15 @@
 {
-  "name": "cqx-kit",
-  "version": "0.7.2",
+  "name": "@cqxai/kit",
+  "version": "0.7.3",
   "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samifouad/cqx-kit.git"
+    "url": "git+https://github.com/cqxai/kit.git"
   },
   "homepage": "https://cqx.bio",
-  "bugs": "https://github.com/samifouad/cqx-kit/issues",
+  "bugs": "https://github.com/cqxai/kit/issues",
   "keywords": [
     "cqx",
     "rust",
@@ -57,7 +57,7 @@
     "build": "npm run brand:check && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node tests/brand.mjs && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs && node tests/source.mjs && node tests/store.mjs && node tests/diff.mjs"
+    "test": "npm run build && node tests/brand.mjs && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs && node tests/source.mjs && node tests/store.mjs && node tests/diff.mjs && node tests/consumer.mjs"
   },
   "dependencies": {
     "d3-force": "^3.0.0",
