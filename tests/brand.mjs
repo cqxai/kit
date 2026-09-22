@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { brand, light, dark, palette, stripe, grid, typeScale } from 'cqx-kit/brand';
+import { brand, light, dark, palette, stripe, grid, typeScale } from '@cqxai/kit/brand';
 
 const root = new URL('../', import.meta.url);
 
@@ -44,7 +44,7 @@ test('the stripe selects the opposite palette in mark order, flush at both sizes
 });
 
 test('CSS is exported and marked as a side effect for web bundlers', async () => {
-  const css = import.meta.resolve('cqx-kit/brand/brand.css');
+  const css = import.meta.resolve('@cqxai/kit/brand/brand.css');
   assert.equal(css, new URL('../dist/brand/brand.css', import.meta.url).href);
   assert.ok((await readFile(new URL(css), 'utf8')).startsWith('/* Generated from src/brand/tokens.json'));
   const manifest = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));

@@ -11,15 +11,15 @@ These are existing values, not a new palette or a redesigned scale:
 
 | Data | Source |
 | --- | --- |
-| Both palettes, including chip and syntax colours | [cqx-bio/app/globals.css](https://github.com/samifouad/cqx-bio/blob/main/app/globals.css) |
+| Both palettes, including chip and syntax colours | [cqx-bio/app/globals.css](https://github.com/cqxai/bio/blob/main/app/globals.css) |
 | Fixed stripe, flush left, 23px width, equal bands, 10px at ≤720px | Widths from the same file's `.stripes` rules; flush placement follows the desktop app standard |
-| Green, yellow, red, brown order | [cqx-bio/app/icon.svg](https://github.com/samifouad/cqx-bio/blob/main/app/icon.svg) and the issue #1 brief |
-| Opposite-mode stripe palette | [Issue #1](https://github.com/samifouad/cqx-kit/issues/1) and its implementation brief |
-| Grid colours, 28px square spacing, 1px lines | [cqx-desktop/src/app/globals.css](https://github.com/samifouad/cqx-desktop/blob/main/src/app/globals.css) |
-| Camel-cased light/dark colour objects | [cqx-mobileapp/src/theme/colors.ts](https://github.com/samifouad/cqx-mobileapp/blob/main/src/theme/colors.ts) |
+| Green, yellow, red, brown order | [cqx-bio/app/icon.svg](https://github.com/cqxai/bio/blob/main/app/icon.svg) and the issue #1 brief |
+| Opposite-mode stripe palette | [Issue #1](https://github.com/cqxai/kit/issues/1) and its implementation brief |
+| Grid colours, 28px square spacing, 1px lines | [cqx-desktop/src/app/globals.css](https://github.com/cqxai/desktop/blob/main/src/app/globals.css) |
+| Camel-cased light/dark colour objects | [cqx-mobileapp/src/theme/colors.ts](https://github.com/cqxai/mobileapp/blob/main/src/theme/colors.ts) |
 | Display weight/tracking and cycling-label size/weight/tracking | `cqx-bio/app/globals.css`, `.display` and `.cycle` |
-| Body 14px/23px | [cqx-mobileapp/src/components/Type.tsx](https://github.com/samifouad/cqx-mobileapp/blob/main/src/components/Type.tsx) |
-| Wide wordmark 34px/42px and -1.5px tracking | [cqx-mobileapp/src/components/BrandFrame.tsx](https://github.com/samifouad/cqx-mobileapp/blob/main/src/components/BrandFrame.tsx) |
+| Body 14px/23px | [cqx-mobileapp/src/components/Type.tsx](https://github.com/cqxai/mobileapp/blob/main/src/components/Type.tsx) |
+| Wide wordmark 34px/42px and -1.5px tracking | [cqx-mobileapp/src/components/BrandFrame.tsx](https://github.com/cqxai/mobileapp/blob/main/src/components/BrandFrame.tsx) |
 
 The named palette files contain no complete font-size scale. `typeScale`
 therefore records the existing mobile body/wordmark sizes alongside the CSS
@@ -30,13 +30,13 @@ relative to the current font size. Font loading remains the host's job.
 ## Web
 
 ```css
-@import "cqx-kit/brand/brand.css";
+@import "@cqxai/kit/brand/brand.css";
 ```
 
 The stylesheet defines the existing `--ground`, `--green`, `--ink-soft`, etc.,
 plus `--color-code-*`. Light is the default; the OS preference selects dark
 unless `data-theme="light"` is set on `<html>`. `data-theme="dark"` explicitly
-selects dark. This matches `cqx-kit/ui`'s `ThemePicker` contract.
+selects dark. This matches `@cqxai/kit/ui`'s `ThemePicker` contract.
 
 Tailwind hosts retain their `@theme inline` colour adapter and `@source`
 directive. For example, `Glyph` in `src/ui/cards/Card.tsx` needs
@@ -44,8 +44,8 @@ directive. For example, `Glyph` in `src/ui/cards/Card.tsx` needs
 
 ```css
 @import "tailwindcss";
-@import "cqx-kit/brand/brand.css";
-@source "../node_modules/cqx-kit/dist";
+@import "@cqxai/kit/brand/brand.css";
+@source "../node_modules/@cqxai/kit/dist";
 
 @theme inline {
   --color-ground: var(--ground);
@@ -96,8 +96,8 @@ text styles automatically.
 ## React Native
 
 ```ts
-import { light, dark, palette, stripe, typeScale } from 'cqx-kit/brand';
-import type { Mode, ThemeColors } from 'cqx-kit/brand';
+import { light, dark, palette, stripe, typeScale } from '@cqxai/kit/brand';
+import type { Mode, ThemeColors } from '@cqxai/kit/brand';
 
 const mode: Mode = 'dark'; // host theme state
 const colors: ThemeColors = mode === 'dark' ? dark : light;

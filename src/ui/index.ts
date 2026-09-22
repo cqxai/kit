@@ -33,7 +33,7 @@
  * Tailwind must also be told to scan this package, or none of the utilities
  * these components name will be generated:
  *
- *   @source "../node_modules/cqx-kit/dist";
+ *   @source "../node_modules/@cqxai/kit/dist";
  *
  * Two breakpoints are assumed: `side`, where the menu becomes a column
  * beside the report, and `wide`, where the report itself holds two columns.
