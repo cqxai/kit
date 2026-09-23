@@ -91,7 +91,7 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
 }
 
 /*
- * Lucide Sun and Moon path data
+ * Lucide Sun and Moon elements copied from lucide-react v0.553.0.
  * ISC License
  * Copyright (c) 2026 Lucide Icons and Contributors
  *
@@ -107,18 +107,6 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-const SUN_PATHS = [
-  'M12 2v2',
-  'M12 20v2',
-  'M4.93 4.93l1.42 1.42',
-  'M17.66 17.66l1.42 1.42',
-  'M2 12h2',
-  'M20 12h2',
-  'M6.34 17.66l-1.42 1.42',
-  'M17.66 6.34l1.42-1.42',
-];
-const MOON_PATH = 'M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.5 6.5 0 0 0 8.268 8.268c.344-.215.825-.003.803.401';
-
 function ThemeIcon({ theme }: { theme: Theme }) {
   return (
     <svg
@@ -135,9 +123,16 @@ function ThemeIcon({ theme }: { theme: Theme }) {
       {theme === 'dark'
         ? <>
             <circle cx="12" cy="12" r="4" />
-            {SUN_PATHS.map((path) => <path key={path} d={path} />)}
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
           </>
-        : <path d={MOON_PATH} />}
+        : <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />}
     </svg>
   );
 }

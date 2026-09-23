@@ -1,9 +1,26 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
 import { JSDOM } from 'jsdom';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ThemeScript, ThemeToggle, themeScript, useTheme } from '../dist/theme/index.js';
+
+async function readLucideIconNode(name) {
+  const source = await readFile(new URL(`./fixtures/lucide-0.553.0/${name}.js`, import.meta.url), 'utf8');
+  const match = source.match(/const __iconNode = (\[[\s\S]*?\]);\nconst [A-Z]/);
+  assert.ok(match, `lucide-react 0.553.0 ${name} fixture contains __iconNode`);
+  return JSON.parse(JSON.stringify(runInNewContext(match[1])));
+}
+
+function renderedIconElements(svg) {
+  return [...svg.children].map((element) => {
+    const attributes = {};
+    for (const attribute of element.attributes) attributes[attribute.name] = attribute.value;
+    return [element.localName, attributes];
+  });
+}
 
 function mediaList(initial) {
   const listeners = new Set();
@@ -115,9 +132,9 @@ function Probe({ onValue }) {
   dom.window.close();
 }
 
-for (const [theme, path] of [
-  ['light', 'M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.5 6.5 0 0 0 8.268 8.268c.344-.215.825-.003.803.401'],
-  ['dark', 'M12 2v2'],
+for (const [theme, iconName] of [
+  ['light', 'moon'],
+  ['dark', 'sun'],
 ]) {
   const { dom, container } = installDom({ theme });
   const root = createRoot(container);
@@ -126,8 +143,12 @@ for (const [theme, path] of [
   assert.equal(button.getAttribute('aria-label'), 'Toggle theme');
   assert.equal(button.classList.contains('host-class'), true);
   assert.equal(button.querySelector('svg')?.getAttribute('width'), '16');
-  assert.ok([...button.querySelectorAll('path')].some((node) => node.getAttribute('d') === path),
-    `${theme} theme renders the corresponding Lucide path`);
+  const expected = (await readLucideIconNode(iconName)).map(([tagName, attributes]) => [
+    tagName,
+    Object.fromEntries(Object.entries(attributes).filter(([name]) => name !== 'key')),
+  ]);
+  assert.deepEqual(renderedIconElements(button.querySelector('svg')), expected,
+    `${theme} theme renders the exact lucide-react 0.553.0 ${iconName} elements`);
   await act(async () => root.unmount());
   dom.window.close();
 }
