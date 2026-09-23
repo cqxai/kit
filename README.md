@@ -34,6 +34,42 @@ the reason it is that number rather than another.
 here because it is the product: two deployments that disagree about where the
 menu is, or how a rule card reads, are two tools.
 
+**`@cqxai/kit/theme`** — the shared light/dark theme script, hook and toggle.
+
+## Theme
+
+In a Next.js app, place `<ThemeScript />` in the root layout's `<head>`, put
+`<ThemeToggle />` where the button goes, and style your dark theme on
+`[data-theme=dark]` or `.dark`:
+
+```tsx
+import { ThemeScript, ThemeToggle } from '@cqxai/kit/theme';
+
+// Root layout:
+<html><head><ThemeScript /></head><body><ThemeToggle />{children}</body></html>
+```
+
+The Sun and Moon SVG path data comes from Lucide:
+
+```text
+ISC License
+Copyright (c) 2026 Lucide Icons and Contributors
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+```
+
+The path data is inlined so this package does not add a Lucide dependency.
+
 **`@cqxai/kit/gh`** — a runtime-agnostic GitHub proxy: a function from a Request
 to a Response, so a Cloudflare Worker and a Next route handler are each four
 lines around it.

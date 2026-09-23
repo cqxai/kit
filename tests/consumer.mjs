@@ -27,6 +27,7 @@ try {
     import { policy, band, parsePath, toPath } from '@cqxai/kit/engine';
     import { brand, palette } from '@cqxai/kit/brand';
     import { Profile } from '@cqxai/kit/ui';
+    import { ThemeScript, ThemeToggle, themeScript, useTheme } from '@cqxai/kit/theme';
     import { answer } from '@cqxai/kit/gh';
     assert.equal(policy.readers, 4);
     assert.equal(band(74), 'warn');
@@ -35,6 +36,10 @@ try {
     assert.equal(brand.palette, palette);
     assert.equal(palette.light.green, '#2e7d5b');
     assert.equal(typeof Profile, 'function');
+    assert.equal(typeof ThemeScript, 'function');
+    assert.equal(typeof ThemeToggle, 'function');
+    assert.equal(typeof themeScript, 'string');
+    assert.equal(typeof useTheme, 'function');
     assert.equal(typeof answer, 'function');
     const css = await readFile(new URL(import.meta.resolve('@cqxai/kit/brand/brand.css')), 'utf8');
     assert.ok(css.includes('--green: #2e7d5b;'));
@@ -47,7 +52,7 @@ try {
       }
       console.log('packed export resolves: @cqxai/kit' + name.slice(1));
     }
-    console.log('Packed consumer imports engine, brand, CSS, UI and GitHub proxy successfully.');
+    console.log('Packed consumer imports engine, brand, CSS, UI, theme and GitHub proxy successfully.');
   `);
   execFileSync(process.execPath, ['check.mjs'], { cwd: consumer, stdio: 'inherit' });
 } finally {
