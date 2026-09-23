@@ -1,6 +1,6 @@
 {
   "name": "@cqxai/kit",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",
@@ -37,6 +37,10 @@
       "types": "./dist/ui/index.d.ts",
       "default": "./dist/ui/index.js"
     },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "default": "./dist/theme/index.js"
+    },
     "./workers/analyse": {
       "types": "./dist/workers/analyse.d.ts",
       "default": "./dist/workers/analyse.js"
@@ -57,7 +61,7 @@
     "build": "npm run brand:check && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node tests/brand.mjs && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs && node tests/source.mjs && node tests/store.mjs && node tests/diff.mjs && node tests/consumer.mjs"
+    "test": "npm run build && node tests/brand.mjs && node tests/rank.mjs && node tests/catalog.mjs && node tests/gh.mjs && node tests/source.mjs && node tests/store.mjs && node tests/diff.mjs && node tests/theme.mjs && node tests/consumer.mjs"
   },
   "dependencies": {
     "d3-force": "^3.0.0",
@@ -68,6 +72,7 @@
     "@types/node": "^24.13.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "jsdom": "^26.1.0",
     "react": "^19",
     "react-dom": "^19",
     "typescript": "^5.7.0"
