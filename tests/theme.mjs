@@ -91,9 +91,9 @@ assert.equal(themeFromCookie('dark'), 'dark');
 assert.equal(themeFromCookie('system'), null);
 assert.equal(themeFromCookie(undefined), null);
 
-function installDom({ theme = 'light', saved = null, cookie = null, systemDark = false } = {}) {
+function installDom({ theme = 'light', saved = null, cookie = null, systemDark = false, protocol = 'https:' } = {}) {
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
-    url: 'https://theme.test/',
+    url: `${protocol}//theme.test/`,
   });
   const { window } = dom;
   const media = mediaList(systemDark);
@@ -134,6 +134,7 @@ function Probe({ onValue }) {
   let state;
   await act(async () => root.render(createElement(Probe, { onValue: (value) => { state = value; } })));
   assert.equal(state.theme, 'light', 'hook reads the script-applied value after mount');
+  assert.equal(dom.window.document.cookie, '', 'no saved choice does not create a theme cookie');
 
   await act(async () => media.change(true));
   assert.equal(state.theme, 'dark', 'system change before a click is followed');
@@ -150,6 +151,31 @@ function Probe({ onValue }) {
 
   await act(async () => media.change(true));
   assert.equal(state.theme, 'light', 'system changes after a click are ignored');
+  assert.equal(dom.window.document.documentElement.getAttribute('data-theme'), 'light');
+  await act(async () => root.unmount());
+  dom.window.close();
+}
+
+for (const [protocol, secure] of [['https:', true], ['http:', false]]) {
+  const { dom, container } = installDom({ theme: 'light', saved: 'light', protocol });
+  const root = createRoot(container);
+  let state;
+  await act(async () => root.render(createElement(Probe, { onValue: (value) => { state = value; } })));
+  assert.equal(state.theme, 'light');
+  assert.equal(dom.window.document.cookie, 'theme=light', `${protocol} restores a legacy saved choice to the cookie`);
+  const themeCookie = dom.cookieJar.getCookiesSync(`${protocol}//theme.test/`).find(({ key }) => key === 'theme');
+  assert.equal(themeCookie?.secure, secure, `${protocol} sets Secure=${secure}`);
+  await act(async () => root.unmount());
+  dom.window.close();
+}
+
+{
+  const { dom, container } = installDom({ theme: 'dark', saved: 'light', cookie: 'dark' });
+  const root = createRoot(container);
+  let state;
+  await act(async () => root.render(createElement(Probe, { onValue: (value) => { state = value; } })));
+  assert.equal(state.theme, 'light', 'a saved choice replaces a different cookie');
+  assert.equal(dom.window.document.cookie, 'theme=light');
   assert.equal(dom.window.document.documentElement.getAttribute('data-theme'), 'light');
   await act(async () => root.unmount());
   dom.window.close();

@@ -45,14 +45,24 @@ function readCookieTheme(): Theme | null {
   }
 }
 
+function writeCookieTheme(theme: Theme): void {
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${THEME_COOKIE}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+}
+
 export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
   const [theme, setTheme] = useState<Theme | null>(null);
   const hasSavedChoice = useRef(false);
 
   useEffect(() => {
-    const saved = readCookieTheme() ?? readSavedTheme();
-    hasSavedChoice.current = hasSavedChoice.current || saved !== null;
-    const initial = readAppliedTheme();
+    const cookie = readCookieTheme();
+    const saved = readSavedTheme();
+    hasSavedChoice.current = cookie !== null || saved !== null;
+    if (saved !== null && cookie !== saved) {
+      writeCookieTheme(saved);
+      applyTheme(saved);
+    }
+    const initial = saved ?? readAppliedTheme();
     setTheme(initial);
 
     const media = window.matchMedia(DARK_MODE_QUERY);
@@ -76,7 +86,7 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
     } catch {
       // The selected theme still applies for this page when storage is blocked.
     }
-    document.cookie = `${THEME_COOKIE}=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
+    writeCookieTheme(next);
   }, [theme]);
 
   return { theme, toggleTheme };
