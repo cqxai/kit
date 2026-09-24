@@ -15,7 +15,7 @@
 
 /** A level's title, and the sentence under it that says what it is for. */
 export const H2 = 'mb-[3px] text-[24px] leading-tight tracking-[-0.02em] text-balance text-ink';
-export const LEDE = 'mb-4 max-w-[66ch] text-[14px] text-ink-soft';
+export const LEDE = 'mb-4 max-w-[66ch] text-[14px] text-ink-soft [overflow-wrap:anywhere]';
 
 /** Nothing to show, said in the space the something would have taken. */
 export const EMPTY =

@@ -11,6 +11,7 @@
  * neither works in both.
  */
 import { packageEdges, type Package, type RepoMeta } from '../../engine/index.js';
+import { Breakable } from '../Breaks.js';
 
 /**
  * The cover is the repository's own dependency graph.
@@ -135,9 +136,9 @@ export function Cover({
         />
       </span>
 
-      <div className="absolute bottom-3.5 left-[140px] text-white [text-shadow:0_1px_3px_rgba(0,0,0,.55)] max-side:left-[100px]">
+      <div className="absolute bottom-3.5 left-[140px] right-4 text-white [overflow-wrap:anywhere] [text-shadow:0_1px_3px_rgba(0,0,0,.55)] max-side:left-[100px]">
         <h1 className="m-0 font-display text-[25px] font-bold leading-[1.1] tracking-[-0.01em] max-side:text-[20px]">
-          {repo}
+          <Breakable text={repo} />
         </h1>
         {meta?.description ? (
           <p className="m-0 mt-0.5 max-w-[620px] text-[12.5px] text-white/85">{meta.description}</p>
