@@ -1,5 +1,7 @@
 import type { Finding as One } from '../engine/index.js';
 
+import { Breakable } from './Breaks.js';
+
 /**
  * One finding, shown the way a compiler shows one.
  *
@@ -29,8 +31,8 @@ export function Finding({ finding, remedy }: { finding: One; remedy?: string }) 
       <div className="flex flex-wrap items-baseline gap-[7px] font-mono text-[11.5px]">
         {/* One element: a gap between the path and its line number would read
             as two separate facts, and a reader copies the whole thing. */}
-        <span className="text-ink-soft">
-          {finding.file}
+        <span className="text-ink-soft [overflow-wrap:anywhere]">
+          <Breakable text={finding.file} />
           {finding.line ? (
             <span className="text-accent">
               :{finding.line}
@@ -38,7 +40,11 @@ export function Finding({ finding, remedy }: { finding: One; remedy?: string }) 
             </span>
           ) : null}
         </span>
-        {!finding.text ? <span className="text-ink-faint">{finding.what}</span> : null}
+        {!finding.text ? (
+          <span className="text-ink-faint [overflow-wrap:anywhere]">
+            <Breakable text={finding.what} />
+          </span>
+        ) : null}
       </div>
 
       {finding.text ? (
