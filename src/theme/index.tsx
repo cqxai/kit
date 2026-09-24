@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { applyTheme, themeScript, type Theme } from './shared.js';
+import { applyTheme, resolveTheme, themeScript, type Theme } from './shared.js';
 
 export type { Theme } from './shared.js';
 export { themeScript } from './shared.js';
@@ -36,6 +36,14 @@ function readSavedTheme(): Theme | null {
   }
 }
 
+function writeSavedTheme(theme: Theme): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // The cookie remains authoritative when storage is blocked.
+  }
+}
+
 function readCookieTheme(): Theme | null {
   try {
     const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)(?:;|$)/);
@@ -58,11 +66,13 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
     const cookie = readCookieTheme();
     const saved = readSavedTheme();
     hasSavedChoice.current = cookie !== null || saved !== null;
-    if (saved !== null && cookie !== saved) {
+    const os = window.matchMedia(DARK_MODE_QUERY).matches ? 'dark' : 'light';
+    const initial = resolveTheme(cookie, saved, os);
+    if (cookie !== null && saved !== cookie) {
+      writeSavedTheme(cookie);
+    } else if (cookie === null && saved !== null) {
       writeCookieTheme(saved);
-      applyTheme(saved);
     }
-    const initial = saved ?? readAppliedTheme();
     setTheme(initial);
 
     const media = window.matchMedia(DARK_MODE_QUERY);

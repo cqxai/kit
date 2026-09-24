@@ -172,11 +172,31 @@ for (const [protocol, secure] of [['https:', true], ['http:', false]]) {
 {
   const { dom, container } = installDom({ theme: 'dark', saved: 'light', cookie: 'dark' });
   const root = createRoot(container);
+  runInNewContext(themeScript, {
+    document: dom.window.document,
+    localStorage: dom.window.localStorage,
+    matchMedia: dom.window.matchMedia,
+  });
+  const rootElement = dom.window.document.documentElement;
+  const bootTheme = rootElement.getAttribute('data-theme');
+  const bootClass = rootElement.className;
+  await act(async () => root.render(createElement(Probe, { onValue() {} })));
+  assert.equal(rootElement.getAttribute('data-theme'), bootTheme,
+    'mount does not change the theme set by the boot script when saved storage is stale');
+  assert.equal(rootElement.className, bootClass,
+    'mount does not change the theme class set by the boot script when saved storage is stale');
+  await act(async () => root.unmount());
+  dom.window.close();
+}
+
+{
+  const { dom, container } = installDom({ theme: 'dark', saved: 'light', cookie: 'dark' });
+  const root = createRoot(container);
   let state;
   await act(async () => root.render(createElement(Probe, { onValue: (value) => { state = value; } })));
-  assert.equal(state.theme, 'light', 'a saved choice replaces a different cookie');
-  assert.equal(dom.window.document.cookie, 'theme=light');
-  assert.equal(dom.window.document.documentElement.getAttribute('data-theme'), 'light');
+  assert.equal(state.theme, 'dark', 'a cookie beats a different saved choice');
+  assert.equal(dom.window.localStorage.getItem('theme'), 'dark', 'the saved choice is updated to the cookie');
+  assert.equal(dom.window.document.cookie, 'theme=dark');
   await act(async () => root.unmount());
   dom.window.close();
 }
@@ -185,7 +205,7 @@ for (const [theme, iconName] of [
   ['light', 'moon'],
   ['dark', 'sun'],
 ]) {
-  const { dom, container } = installDom({ theme });
+  const { dom, container } = installDom({ theme, systemDark: theme === 'dark' });
   const root = createRoot(container);
   await act(async () => root.render(createElement(ThemeToggle, { className: 'host-class' })));
   const button = container.querySelector('button');
