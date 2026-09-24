@@ -63,7 +63,7 @@ export function ScoreLevel({
           step through the time machine moved the rings. */}
       <div className="mb-2.5 flex flex-wrap items-center gap-2 font-mono text-[12px] text-ink-faint [&>b]:text-accent">
         viewing <b>{commit?.short ?? at ?? '—'}</b>
-        {commit ? <> · {commit.subject}</> : at ? ' · not among the commits on the rail' : null}
+        {commit ? <span className="[overflow-wrap:anywhere]">· {commit.subject}</span> : at ? ' · not among the commits on the rail' : null}
         {/* Present at head too, just not offered: a button that appears only
             on older commits makes this line taller there, and moves every ring
             beneath it by four pixels on the way in and out. */}

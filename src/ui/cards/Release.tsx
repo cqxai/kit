@@ -1,6 +1,7 @@
 'use client';
 
 import type { Commit } from '../../engine/index.js';
+import { Breakable } from '../Breaks.js';
 import { Card, Face } from './Card.js';
 import { Moves } from './Moves.js';
 
@@ -36,14 +37,17 @@ export function ReleaseCard({
       mark={<Face src={avatar} />}
       title={
         <>
-          <b className="font-semibold">{repo}</b> released{' '}
+          <b className="font-semibold">
+            <Breakable text={repo} />
+          </b>{' '}
+          released{' '}
           <b className="font-semibold text-accent">{tag}</b>
         </>
       }
       when={when}
       chip="release"
     >
-      {commit?.subject ? <p className="m-0 mb-2 text-ink">{commit.subject}</p> : null}
+      {commit?.subject ? <p className="m-0 mb-2 text-ink [overflow-wrap:anywhere]">{commit.subject}</p> : null}
       <Moves commit={commit} />
       {onOpen ? (
         <button

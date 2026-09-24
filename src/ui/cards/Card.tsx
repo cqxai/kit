@@ -43,7 +43,7 @@ export function Card({
       <div className="flex items-start gap-2.5 px-3 pb-1.5 pt-3">
         <span className="mt-px shrink-0">{mark}</span>
         <div className="min-w-0 flex-1">
-          <div className="text-[13px] leading-[1.35] text-ink">{title}</div>
+          <div className="text-[13px] leading-[1.35] text-ink [overflow-wrap:anywhere]">{title}</div>
           <div className="mt-px flex flex-wrap items-center gap-2 font-mono text-[11px] text-ink-faint">
             {when}
             {chip ? (

@@ -2,6 +2,7 @@ import type { FunctionDecl, TypePart } from '../../engine/index.js';
 import { EFFECT_LABEL } from '../../engine/index.js';
 import { pinned } from '../../engine/index.js';
 
+import { Breakable } from '../Breaks.js';
 import { EMPTY, H2, LEDE } from '../classes.js';
 
 /**
@@ -28,9 +29,17 @@ function Annotation({
       {parts.map(([base, owner, depth], i) => (
         <div key={i} className="contents">
           <div className={depth ? 'pl-3.5 text-ink-faint' : 'text-ink-soft'}>
-            {depth ? `└ ${base}` : label}
+            {depth ? (
+              <>
+                └ <Breakable text={base} />
+              </>
+            ) : (
+              label
+            )}
           </div>
-          <div className="text-ink">{depth ? base : written}</div>
+          <div className="text-ink [overflow-wrap:anywhere]">
+            <Breakable text={depth ? base : written} />
+          </div>
           <div className={owner ? (owner === '~' ? 'text-yellow' : 'text-accent') : 'text-ink-faint'}>
             {owner === '~' ? 'ambiguous' : (owner ?? '—')}
           </div>
@@ -79,7 +88,7 @@ export function FunctionsLevel({
                 data-cqx={marked.has(f) ? 'found' : undefined}
                 key={f.id}>
                 <div className="mb-[7px] flex flex-wrap items-baseline gap-2.5">
-                  <span className="font-mono text-[13.5px] font-semibold">{f.name}</span>
+                  <span className="font-mono text-[13.5px] font-semibold [overflow-wrap:anywhere]">{f.name}</span>
                   <span className="flex flex-wrap gap-1">
                     {f.eff.map((k) => (
                       <span
@@ -90,8 +99,8 @@ export function FunctionsLevel({
                       </span>
                     ))}
                   </span>
-                  <span className="ml-auto font-mono text-[11px] text-ink-faint">
-                    {f.file ?? ''}
+                  <span className="ml-auto font-mono text-[11px] text-ink-faint [overflow-wrap:anywhere]">
+                    <Breakable text={f.file ?? ''} />
                   </span>
                 </div>
                 <code className="mb-2 block whitespace-pre-wrap font-mono text-[12.5px] text-ink [overflow-wrap:anywhere]">

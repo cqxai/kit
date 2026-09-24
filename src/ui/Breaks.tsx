@@ -5,7 +5,7 @@ import { Fragment } from 'react';
  *
  * What the scorer writes about code is full of names with no spaces in them —
  * `react_compiler_inference::propagate_scope_dependencies_hir::convert_hoisted_lvalue`,
- * `crates/core/src/lib.rs`, `cryptocorrosion/cryptocorrosion`. A browser only
+ * `crates/core/src/lib.rs`, `HashMap<IdentifierId,ReactiveScopeDependency>`. A browser only
  * breaks a line at a space, so a name like that is one ninety-character word,
  * and on a phone it pushes the whole page sideways.
  *
@@ -32,5 +32,6 @@ export function Breakable({ text }: { text: string }) {
   );
 }
 
-/** After a Rust path's `::`, a module or file's `.`, and a path's `/`. */
-const SEAM = /(?<=::|\.|\/)(?!$)/;
+/** After a Rust path's `::`, a module or file's `.`, a path's `/`, and a
+ *  type's `<` and `,`. */
+const SEAM = /(?<=::|[./<,])(?!$)/;

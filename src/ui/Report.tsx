@@ -20,6 +20,7 @@ import { LevelView } from './LevelView.js';
 import { Search, SearchButton, useSearchKey } from './Search.js';
 import { Analysing, Working } from './Loading.js';
 import { EMPTY } from './classes.js';
+import { Breakable } from './Breaks.js';
 
 /** A crumb: a link unless it would land you where you already are. */
 const CRUMB = 'cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-accent hover:underline';
@@ -36,8 +37,11 @@ const CRUMB = 'cursor-pointer border-0 bg-transparent p-0 font-[inherit] text-ac
  * A crumb that would land you where you already are is not a link. That is
  * the file, usually, since the scope bar is only drawn once there is one; at
  * Functions it becomes a link again, back up to that file's types.
+ *
+ * Exported from this module so `tests/wrap.mjs` can lay it out on its own;
+ * the package's `ui` entry does not re-export it.
  */
-function Scope({
+export function Scope({
   view,
   onGo,
 }: {
@@ -65,7 +69,7 @@ function Scope({
 
   return (
     <nav
-      className="mb-2.5 flex flex-wrap items-baseline gap-[7px] font-mono text-[12.5px]"
+      className="mb-2.5 flex flex-wrap items-baseline gap-[7px] font-mono text-[12.5px] [overflow-wrap:anywhere]"
       aria-label="Scope"
     >
       {crumbs.map((crumb, i) => {
@@ -76,8 +80,12 @@ function Scope({
         const inner = (
           <>
             {/* The directories are context; the file is the thing. */}
-            {crumb.dir ? <em className="not-italic text-ink-faint">{crumb.dir}</em> : null}
-            {crumb.label}
+            {crumb.dir ? (
+              <em className="not-italic text-ink-faint">
+                <Breakable text={crumb.dir} />
+              </em>
+            ) : null}
+            <Breakable text={crumb.label} />
           </>
         );
         return (
