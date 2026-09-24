@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Finding, Rule, RuleConfig } from '../engine/index.js';
 import { sourceOf, sourceHeld } from '../engine/index.js';
 
+import { Breakable } from './Breaks.js';
 import { Code } from './Code.js';
 
 /**
@@ -209,8 +210,8 @@ export function RuleCard({
               </div>
             </>
           ) : (
-            <p className="mt-[9px] font-mono text-[11.5px] text-ink-faint">
-              {finding.what}
+            <p className="mt-[9px] font-mono text-[11.5px] text-ink-faint [overflow-wrap:anywhere]">
+              <Breakable text={finding.what} />
             </p>
           )}
         </div>
