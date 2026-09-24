@@ -1,34 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { applyTheme, themeScript, type Theme } from './shared.js';
 
-export type Theme = 'light' | 'dark';
+export type { Theme } from './shared.js';
+export { themeScript } from './shared.js';
 
 const STORAGE_KEY = 'theme';
+const THEME_COOKIE = 'theme';
 const DARK_MODE_QUERY = '(prefers-color-scheme: dark)';
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.setAttribute('data-theme', theme);
-  root.classList.remove(theme === 'dark' ? 'light' : 'dark');
-  root.classList.add(theme);
-  root.style.colorScheme = theme;
-}
-
-/**
- * Inline this in the document head to apply the saved or system theme before
- * the page paints.
- */
-export const themeScript = `(function () {
-  var t;
-  try { t = localStorage.getItem('theme'); } catch (_) {}
-  if (t !== 'light' && t !== 'dark') {
-    t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  var applyTheme = ${applyTheme.toString()};
-  applyTheme(t);
-})();`;
-
+/** Legacy client export. Server-rendered applications should use theme/server. */
 export function ThemeScript() {
   return <script dangerouslySetInnerHTML={{ __html: themeScript }} />;
 }
@@ -54,12 +36,21 @@ function readSavedTheme(): Theme | null {
   }
 }
 
+function readCookieTheme(): Theme | null {
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)(?:;|$)/);
+    return match ? match[1] as Theme : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
   const [theme, setTheme] = useState<Theme | null>(null);
   const hasSavedChoice = useRef(false);
 
   useEffect(() => {
-    const saved = readSavedTheme();
+    const saved = readCookieTheme() ?? readSavedTheme();
     hasSavedChoice.current = hasSavedChoice.current || saved !== null;
     const initial = readAppliedTheme();
     setTheme(initial);
@@ -85,6 +76,7 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
     } catch {
       // The selected theme still applies for this page when storage is blocked.
     }
+    document.cookie = `${THEME_COOKIE}=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
   }, [theme]);
 
   return { theme, toggleTheme };

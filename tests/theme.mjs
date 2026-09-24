@@ -6,6 +6,7 @@ import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ThemeScript, ThemeToggle, themeScript, useTheme } from '../dist/theme/index.js';
+import { ThemeScript as ServerThemeScript, themeFromCookie } from '../dist/theme/server.js';
 
 async function readLucideIconNode(name) {
   const source = await readFile(new URL(`./fixtures/lucide-0.553.0/${name}.js`, import.meta.url), 'utf8');
@@ -39,13 +40,14 @@ function mediaList(initial) {
   };
 }
 
-function runBootScript({ systemDark, saved, storageThrows = false }) {
+function runBootScript({ systemDark, saved, cookie, storageThrows = false }) {
   const dom = new JSDOM('<!doctype html><html class="dark"><head></head><body></body></html>', {
     runScripts: 'dangerously',
     url: 'https://theme.test/',
   });
   const { window } = dom;
   window.matchMedia = () => ({ matches: systemDark });
+  if (cookie !== undefined) window.document.cookie = `theme=${cookie}; Path=/`;
   if (storageThrows) {
     Object.defineProperty(window, 'localStorage', {
       configurable: true,
@@ -71,6 +73,8 @@ for (const [name, options, expected] of [
   ['no saved theme follows dark OS', { systemDark: true }, 'dark'],
   ['no saved theme follows light OS', { systemDark: false }, 'light'],
   ['saved light overrides dark OS', { systemDark: true, saved: 'light' }, 'light'],
+  ['theme cookie overrides dark OS and stale local storage', { systemDark: true, saved: 'dark', cookie: 'light' }, 'light'],
+  ['theme cookie overrides light OS and stale local storage', { systemDark: false, saved: 'light', cookie: 'dark' }, 'dark'],
   ['garbage saved theme falls back to OS', { systemDark: true, saved: 'sepia' }, 'dark'],
   ['blocked localStorage falls back to OS', { systemDark: true, storageThrows: true }, 'dark'],
 ]) {
@@ -82,7 +86,12 @@ for (const [name, options, expected] of [
   result.dom.window.close();
 }
 
-function installDom({ theme = 'light', saved = null, systemDark = false } = {}) {
+assert.equal(themeFromCookie('light'), 'light');
+assert.equal(themeFromCookie('dark'), 'dark');
+assert.equal(themeFromCookie('system'), null);
+assert.equal(themeFromCookie(undefined), null);
+
+function installDom({ theme = 'light', saved = null, cookie = null, systemDark = false } = {}) {
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
     url: 'https://theme.test/',
   });
@@ -90,6 +99,7 @@ function installDom({ theme = 'light', saved = null, systemDark = false } = {}) 
   const media = mediaList(systemDark);
   window.matchMedia = () => media;
   if (saved !== null) window.localStorage.setItem('theme', saved);
+  if (cookie !== null) window.document.cookie = `theme=${cookie}; Path=/`;
   const rootElement = window.document.documentElement;
   rootElement.setAttribute('data-theme', theme);
   rootElement.classList.add(theme);
@@ -98,6 +108,18 @@ function installDom({ theme = 'light', saved = null, systemDark = false } = {}) 
   globalThis.document = window.document;
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   return { dom, media, container: window.document.getElementById('root') };
+}
+
+{
+  const { dom, media, container } = installDom({ theme: 'dark', cookie: 'dark' });
+  const root = createRoot(container);
+  let state;
+  await act(async () => root.render(createElement(Probe, { onValue: (value) => { state = value; } })));
+  assert.equal(state.theme, 'dark');
+  await act(async () => media.change(false));
+  assert.equal(state.theme, 'dark', 'a cookie choice is not replaced by a system change');
+  await act(async () => root.unmount());
+  dom.window.close();
 }
 
 function Probe({ onValue }) {
@@ -124,6 +146,7 @@ function Probe({ onValue }) {
   assert.equal(dom.window.document.documentElement.classList.contains('dark'), false);
   assert.equal(dom.window.document.documentElement.style.colorScheme, 'light');
   assert.equal(dom.window.localStorage.getItem('theme'), 'light');
+  assert.equal(dom.window.document.cookie, 'theme=light');
 
   await act(async () => media.change(true));
   assert.equal(state.theme, 'light', 'system changes after a click are ignored');
@@ -156,6 +179,7 @@ for (const [theme, iconName] of [
 {
   const scriptElement = ThemeScript();
   assert.equal(scriptElement.props.dangerouslySetInnerHTML.__html, themeScript);
+  assert.equal(ServerThemeScript().props.dangerouslySetInnerHTML.__html, themeScript);
   const dom = new JSDOM(renderToStaticMarkup(createElement(ThemeToggle)));
   const button = dom.window.document.querySelector('button');
   assert.ok(button, 'server output contains the placeholder button');
