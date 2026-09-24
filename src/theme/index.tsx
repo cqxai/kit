@@ -1,34 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { applyTheme, resolveTheme, themeScript, type Theme } from './shared.js';
 
-export type Theme = 'light' | 'dark';
+export type { Theme } from './shared.js';
+export { themeScript } from './shared.js';
 
 const STORAGE_KEY = 'theme';
+const THEME_COOKIE = 'theme';
 const DARK_MODE_QUERY = '(prefers-color-scheme: dark)';
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.setAttribute('data-theme', theme);
-  root.classList.remove(theme === 'dark' ? 'light' : 'dark');
-  root.classList.add(theme);
-  root.style.colorScheme = theme;
-}
-
-/**
- * Inline this in the document head to apply the saved or system theme before
- * the page paints.
- */
-export const themeScript = `(function () {
-  var t;
-  try { t = localStorage.getItem('theme'); } catch (_) {}
-  if (t !== 'light' && t !== 'dark') {
-    t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  var applyTheme = ${applyTheme.toString()};
-  applyTheme(t);
-})();`;
-
+/** Legacy client export. Server-rendered applications should use theme/server. */
 export function ThemeScript() {
   return <script dangerouslySetInnerHTML={{ __html: themeScript }} />;
 }
@@ -54,14 +36,43 @@ function readSavedTheme(): Theme | null {
   }
 }
 
+function writeSavedTheme(theme: Theme): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // The cookie remains authoritative when storage is blocked.
+  }
+}
+
+function readCookieTheme(): Theme | null {
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)theme=(light|dark)(?:;|$)/);
+    return match ? match[1] as Theme : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCookieTheme(theme: Theme): void {
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${THEME_COOKIE}=${theme}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+}
+
 export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
   const [theme, setTheme] = useState<Theme | null>(null);
   const hasSavedChoice = useRef(false);
 
   useEffect(() => {
+    const cookie = readCookieTheme();
     const saved = readSavedTheme();
-    hasSavedChoice.current = hasSavedChoice.current || saved !== null;
-    const initial = readAppliedTheme();
+    hasSavedChoice.current = cookie !== null || saved !== null;
+    const os = window.matchMedia(DARK_MODE_QUERY).matches ? 'dark' : 'light';
+    const initial = resolveTheme(cookie, saved, os);
+    if (cookie !== null && saved !== cookie) {
+      writeSavedTheme(cookie);
+    } else if (cookie === null && saved !== null) {
+      writeCookieTheme(saved);
+    }
     setTheme(initial);
 
     const media = window.matchMedia(DARK_MODE_QUERY);
@@ -85,6 +96,7 @@ export function useTheme(): { theme: Theme | null; toggleTheme: () => void } {
     } catch {
       // The selected theme still applies for this page when storage is blocked.
     }
+    writeCookieTheme(next);
   }, [theme]);
 
   return { theme, toggleTheme };
