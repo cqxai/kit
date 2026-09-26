@@ -1,6 +1,6 @@
 # @cqxai/kit
 
-The shared engine behind [cqx.bio](https://cqx.bio) and the deka explorer.
+The shared engine behind [cqx.dev](https://cqx.dev) and the deka explorer.
 
 Two sites render the same data and answer the same questions. The moment one
 decides a repository opens on its latest release and the other opens on its

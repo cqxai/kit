@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 /**
  * The theme control, in the explorer's own stylesheet.
  *
- * cqx.bio has one of these already, written in Tailwind. This is not that
+ * cqx.dev has one of these already, written in Tailwind. This is not that
  * one, on purpose: the explorer is not a Tailwind surface — `globals.css`
  * carries `@source not "../explorer"` so that a class named `ring` for a
  * score dial does not collect a utility named `ring` — and a component

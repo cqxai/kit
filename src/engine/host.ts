@@ -16,7 +16,7 @@
  * beside itself; nothing in here can assume the path.
  *
  * **The store.** Which bucket of already-analysed datasets to try before
- * reading a repository from source. explorer.deka.gg and cqx.bio point at the
+ * reading a repository from source. explorer.deka.gg and cqx.dev point at the
  * same one today, and a viewer opened on a folder points at none.
  *
  * Installed once, before anything else is called. A single object rather than

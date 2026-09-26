@@ -78,7 +78,7 @@ export type Repo = {
  *
  * Without one this hook knows nothing until it has mounted and read
  * `location`, so a server renders a page with no repository on it — which is
- * what cqx.bio shipped: fourteen kilobytes of HTML saying "Nothing to open".
+ * what cqx.dev shipped: fourteen kilobytes of HTML saying "Nothing to open".
  * A deployment that knows the path before it renders passes it here and the
  * first render is the right one, on the server and in the browser both.
  *

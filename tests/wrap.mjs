@@ -23,7 +23,7 @@ import { ScoreLevel } from '../dist/ui/levels/Score.js';
 
 const PHONE = 390;
 
-// Real text that pushed cqx.bio past a phone's width (cqxai/kit#4).
+// Real text that pushed cqx.dev past a phone's width (cqxai/kit#4).
 const REACT_PATH =
   'copy of react_compiler_inference::propagate_scope_dependencies_hir::convert_hoisted_lvalue';
 const HELIX_SUBJECT = 'typo: `request_document_diagnostics_for_language_se{,r}vers` (#16025)';
