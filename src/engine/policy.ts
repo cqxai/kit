@@ -1,7 +1,7 @@
 /**
  * Every default the explorer has an opinion about, in one place.
  *
- * This file is the reason the package exists. cqx.bio and the deka explorer
+ * This file is the reason the package exists. cqx.dev and the deka explorer
  * render the same data and answer the same questions, and the moment one of
  * them decides that a repository opens on its latest release while the other
  * opens on its latest commit, the two are different products that happen to

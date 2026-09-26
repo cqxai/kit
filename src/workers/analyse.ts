@@ -108,7 +108,7 @@ interface Measured {
  * gigabytes gets two of them rather than an out-of-memory error.
  *
  * The ceiling itself is `policy.readers` — a decision, argued once, that the
- * kit carries so cqx.bio cannot quietly disagree with this file about it.
+ * kit carries so cqx.dev cannot quietly disagree with this file about it.
  */
 function howMany(sources: number): number {
   const nav = navigator as Navigator & { deviceMemory?: number };

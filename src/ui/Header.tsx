@@ -34,7 +34,7 @@ function BrandMark({ brand, onHome }: { brand: Brand; onHome: (() => void) | nul
   // Routed only when there is something here to route to. A local href used
   // to be proof of that, back when the explorer was the whole deployment and
   // `/` could only mean a repository. On a site whose front page is somebody
-  // else's — cqx.bio's is marketing — `/` is a different page and taking the
+  // else's — cqx.dev's is marketing — `/` is a different page and taking the
   // click over just moved the reader nowhere.
   const routed = onHome !== null && brand.href.startsWith('/');
   return (
@@ -92,7 +92,7 @@ export function Header({
   // They are not the same number. `--head` is a length the deployment writes
   // down once, and this bar's contents wrap at narrow widths and change height
   // when they do — so a written-down number is right at one width and too big
-  // or too small at every other. On cqx.bio it was 69px against a bar that
+  // or too small at every other. On cqx.dev it was 69px against a bar that
   // renders 57, which left an eleven-pixel strip between the header and the
   // parked tab row for the page to scroll through.
   //

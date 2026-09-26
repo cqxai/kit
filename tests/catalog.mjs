@@ -2,7 +2,7 @@
  * What a deployment's manifest means.
  *
  * One rule, and it is the one that was wrong: a field that is absent is not
- * the same as a field that is present and null. cqx.bio said it had no
+ * the same as a field that is present and null. cqx.dev said it had no
  * default repository and listed four as suggestions, and `??` handed it the
  * first suggestion — so the home link in its header went to `denoland/deno`
  * from then on, whatever you were reading.

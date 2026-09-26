@@ -1,14 +1,14 @@
 {
   "name": "@cqxai/kit",
   "version": "0.8.2",
-  "description": "The shared engine behind cqx.bio and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
+  "description": "The shared engine behind cqx.dev and the deka explorer: one answer to what a default is, and one set of shapes for what cqx emits.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cqxai/kit.git"
   },
-  "homepage": "https://cqx.bio",
+  "homepage": "https://cqx.dev",
   "bugs": "https://github.com/cqxai/kit/issues",
   "keywords": [
     "cqx",

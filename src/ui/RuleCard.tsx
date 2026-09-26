@@ -303,10 +303,10 @@ function RuleName({
             cqx config set {rule.rule}.full {config.full}
           </span>
         ) : null}
-        {/* Not a link yet: docs.cqx.bio does not exist, and a link that 404s
+        {/* Not a link yet: docs.cqx.dev does not exist, and a link that 404s
             teaches a reader to stop clicking them. */}
         <span className="font-mono text-[10.5px] text-ink-faint">
-          docs.cqx.bio/{language}/{rule.rule}
+          docs.cqx.dev/{language}/{rule.rule}
         </span>
       </span>
     </span>

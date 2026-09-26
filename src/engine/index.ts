@@ -3,7 +3,7 @@
  * it is drawn.
  *
  * No React, no framework, no DOM beyond what the browser gives every script.
- * Two consumers today — cqx.bio and the deka explorer — and a third coming,
+ * Two consumers today — cqx.dev and the deka explorer — and a third coming,
  * the viewer the CLI opens for a folder on disk. What must never differ
  * between them is here; what may differ is not.
  *

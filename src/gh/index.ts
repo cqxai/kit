@@ -24,7 +24,7 @@
  *
  * Runtime-agnostic on purpose. It is a function from a Request to a Response,
  * so the Cloudflare Worker that serves the deka explorer and the route
- * handler that serves cqx.bio are each four lines around this.
+ * handler that serves cqx.dev are each four lines around this.
  */
 
 /**
